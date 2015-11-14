@@ -93,6 +93,7 @@ class Directory(Item):
         self._parts = []
         self._columns = []
         self._parts_meta = {}
+        self._part_thumbnails = None
 
         self._load_metadata()
 
@@ -132,6 +133,29 @@ class Directory(Item):
     def columns(self):
         return self._columns
 
+    @property
+    def part_thumbnails(self):
+        if self._part_thumbnails:
+            return self._part_thumbnails
+
+        self._part_thumbnails = {}
+        thumb_path = os.path.join(self.data_path, ZWP_PART_THUMBNAIL_DIR)
+
+        if not os.path.exists(thumb_path):
+            return self._part_thumbnails
+
+        for f in os.listdir(thumb_path):
+            parts = f.split('.')
+
+            if parts[-1].lower() not in ['jpg', 'png']:
+                continue
+
+            self._part_thumbnails['.'.join(parts[0:-1])] = os.path.join(
+                self.full_path, ZWP_PART_THUMBNAIL_DIR, f        
+            )
+
+        return self._part_thumbnails
+
     def add_part(self, name):
         self._parts.append(Part(self, name))
 
@@ -163,7 +187,11 @@ class Part:
     def __init__(self, d, name):
         self._dir = d
         self._name = name
-    
+   
+    @property
+    def ds(self):
+        return self._dir.ds
+
     @property
     def label(self):
         return self._name
@@ -171,6 +199,14 @@ class Part:
     @property
     def base_name(self):
         return '.'.join(self._name.split('.')[0:-1])
+
+    @property
+    def thumbnail(self):
+        try:
+            return self._dir.part_thumbnails[self.base_name]
+
+        except KeyError:
+            return None
 
     def get_column(self, n):
         try:

@@ -1,9 +1,9 @@
 from django import template
 from django.http import Http404
-from django.conf import settings
 from zwp.utils import list_directories
 from zwp.models import Directory
 import os
+from zwp.settings import *
 
 
 register = template.Library()
@@ -46,6 +46,12 @@ def directory_tree(context):
 def part_column(part, n):
     return part.get_column(n)
 
+@register.inclusion_tag('zwp/part_thumbnail.html')
+def part_thumbnail(part):
+    return {
+        'part': part,
+        'width': ZWP_PART_THUMBNAIL_WIDTH
+    }
 
 @register.simple_tag
 def zwp_static(ds, path):

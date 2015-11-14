@@ -1,0 +1,7 @@
+{% load zwp_tags %}
+{% if part.thumbnail %}
+	<img
+		src="{% zwp_static part.ds part.thumbnail %}"
+		alt="{{ part.label }}"
+		width="{{ width }}">
+{% endif %}

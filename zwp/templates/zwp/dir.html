@@ -5,21 +5,28 @@
 <h2>{{ zwp_dir.label }}</h2>
 
 <table border="1">
-	<tr>
-		<th>Part</th>
+  <tr>
+    <th>Part</th>
+    <th>Thumbnail</th>
 
-		{% for c in zwp_dir.columns %}
-			<th>{{ c }}</th>
-		{% endfor %}
-	</tr>
-	{% for part in zwp_dir.parts %}
-		<tr>
-			<td>{{ part.label }}</td>
+    {% for c in zwp_dir.columns %}
+      <th>{{ c }}</th>
+    {% endfor %}
+  </tr>
+  {% for part in zwp_dir.parts %}
+    <tr>
+      <td>
+        {{ part.label }}
+      </td>
+       
+      <td>
+	{% part_thumbnail part %}
+      </td>
 
-			{% for c in zwp_dir.columns %}
-				<td>{{ part|part_column:forloop.counter }}</td>
-			{% endfor %}
-		</tr>
-	{% endfor %}
+      {% for c in zwp_dir.columns %}
+        <td>{{ part|part_column:forloop.counter }}</td>
+      {% endfor %}
+    </tr>
+  {% endfor %}
 </table>
 {% endblock %}

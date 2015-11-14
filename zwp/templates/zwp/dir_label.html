@@ -1,12 +1,12 @@
 {% load zwp_tags %}
-{% if dir.text_icon %}
+{% if dir.icon %}
 	<img
-	src="{% zwp_static dir.ds dir.text_icon %}"
+	src="{% zwp_static dir.ds dir.icon %}"
 	alt="{{ dir.label }}"
 	title="{{ dir.label }}">
 {% else %}
-	{% if dir.icon %}
-		<img src="{% zwp_static dir.ds dir.icon %}">
+	{% if dir.text_icon %}
+		<img src="{% zwp_static dir.ds dir.text_icon %}">
 	{% endif %}
 
 	{{ dir.label }}

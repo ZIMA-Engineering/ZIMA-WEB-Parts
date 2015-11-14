@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+{% load zwp_tags %}
+
+{% block content %}
+	<div id="zwp-nav">
+		{% block zwp_menu %}
+			{% directory_tree %}
+		{% endblock %}
+	</div>
+
+	<div id="zwp-content">
+		{% block zwp_dir %}
+		{% endblock %}
+	</div>
+{% endblock %}

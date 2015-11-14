@@ -1,0 +1,18 @@
+{% load zwp_tags %}
+navtree here
+
+<h2>{% dir_label zwp_dir %}</h2>
+
+<p>	
+{% if zwp_parent %}
+  <a href="{{ zwp_parent.url }}">back to {% dir_label zwp_parent %}</a>
+{% else %}
+  at the top
+{% endif %}
+</p>
+
+<ul>
+  {% for dir in zwp_dirs %}
+    <li><a href="{{ dir.url }}">{% dir_label dir %}</a></li>
+  {% endfor %}
+</ul>

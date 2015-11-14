@@ -1,0 +1,13 @@
+{% load zwp_tags %}
+{% if dir.text_icon %}
+	<img
+	src="{% zwp_static dir.ds dir.text_icon %}"
+	alt="{{ dir.label }}"
+	title="{{ dir.label }}">
+{% else %}
+	{% if dir.icon %}
+		<img src="{% zwp_static dir.ds dir.icon %}">
+	{% endif %}
+
+	{{ dir.label }}
+{% endif %}

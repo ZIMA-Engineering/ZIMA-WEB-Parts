@@ -4,6 +4,17 @@
 {% block zwp_dir %}
 <h2>{{ zwp_dir.label }}</h2>
 
+{% if zwp_dir.has_tech_spec %}
+  <h3>Technical specification</h3>
+  <iframe
+    id="dir-tech-spec"
+    src="{{ zwp_dir.tech_spec_url }}"
+    width="920"
+    onload="this.style.height=this.contentDocument.body.scrollHeight + 20 + 'px';">
+  </iframe>
+{% endif %}
+
+<h3>Parts</h3>
 <table border="1">
   <tr>
     <th>Part</th>

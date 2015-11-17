@@ -158,7 +158,69 @@ class Directory(Item):
             )
 
         return self._part_thumbnails
-    
+
+    @property
+    def has_tech_spec(self):
+        if self._tech_spec is not None:
+            return self._tech_spec
+
+        path = os.path.join(self.data_path, ZWP_METADATA_DIR)
+
+        if not os.path.exists(path):
+            self._tech_spec = False
+            return False
+        
+        from .utils import short_lang
+
+        current_lang = short_lang()
+        index = None
+        is_lang = False
+        rx = re.compile(r'^index([_a-z{2}]*)\.html$')
+
+        for f in os.listdir(path):
+            match = rx.match(f)
+
+            if not match:
+                continue
+
+            lang = match.group(1)[1:]
+
+            if lang == current_lang:
+                index = f
+                break
+
+            if index is None:
+                index = f
+                is_lang = len(lang) > 0
+
+            elif is_lang and not lang:
+                index = f
+
+        self._tech_spec = index or False
+        return self._tech_spec
+
+    @property
+    def tech_spec_url(self):
+        if not self.has_tech_spec:
+            return None
+
+        if self.ds.static_url:
+            return os.path.join(
+                self.ds.static_url,
+                self.full_path,
+                ZWP_METADATA_DIR,
+                self._tech_spec
+            )
+
+        return staticfiles_storage.url('zwp_ds_{}/{}'.format(
+            self.ds.name,
+            os.path.join(
+                self.full_path,
+                ZWP_METADATA_DIR,
+                self._tech_spec
+            )
+        ))
+
     def add_part(self, name):
         self._parts.append(Part(self, name))
 

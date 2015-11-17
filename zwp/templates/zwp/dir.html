@@ -15,6 +15,16 @@
 {% endif %}
 
 <h3>Parts</h3>
+
+{% if zwp_dir.has_parts_index %}
+  <iframe
+    id="dir-parts-index"
+    src="{{ zwp_dir.parts_index_url }}"
+    width="920"
+    onload="this.style.height=this.contentDocument.body.scrollHeight + 20 + 'px';">
+  </iframe>
+{% endif %}
+
 <table border="1">
   <tr>
     <th>Part</th>

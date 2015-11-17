@@ -92,7 +92,7 @@ class Directory(Item):
         self._is_dir = True
         self._icon = None
         self._text_icon = None
-        self._tech_spec = None
+        self._indexes = None
         self._parts = []
         self._columns = []
         self._parts_meta = {}
@@ -159,68 +159,6 @@ class Directory(Item):
 
         return self._part_thumbnails
 
-    @property
-    def has_tech_spec(self):
-        if self._tech_spec is not None:
-            return self._tech_spec
-
-        path = os.path.join(self.data_path, ZWP_METADATA_DIR)
-
-        if not os.path.exists(path):
-            self._tech_spec = False
-            return False
-        
-        from .utils import short_lang
-
-        current_lang = short_lang()
-        index = None
-        is_lang = False
-        rx = re.compile(r'^index([_a-z{2}]*)\.html$')
-
-        for f in os.listdir(path):
-            match = rx.match(f)
-
-            if not match:
-                continue
-
-            lang = match.group(1)[1:]
-
-            if lang == current_lang:
-                index = f
-                break
-
-            if index is None:
-                index = f
-                is_lang = len(lang) > 0
-
-            elif is_lang and not lang:
-                index = f
-
-        self._tech_spec = index or False
-        return self._tech_spec
-
-    @property
-    def tech_spec_url(self):
-        if not self.has_tech_spec:
-            return None
-
-        if self.ds.static_url:
-            return os.path.join(
-                self.ds.static_url,
-                self.full_path,
-                ZWP_METADATA_DIR,
-                self._tech_spec
-            )
-
-        return staticfiles_storage.url('zwp_ds_{}/{}'.format(
-            self.ds.name,
-            os.path.join(
-                self.full_path,
-                ZWP_METADATA_DIR,
-                self._tech_spec
-            )
-        ))
-
     def add_part(self, name):
         self._parts.append(Part(self, name))
 
@@ -246,6 +184,89 @@ class Directory(Item):
 
         ret = os.path.join(self.full_path, ZWP_METADATA_DIR, name)
         return ret
+
+    def _find_index(self, name):
+        if self._indexes is None:
+            self._find_indexes()
+
+        return self._indexes.get(name, False)
+
+    def _index_url(self, name):
+        if not self._indexes.get(name, False):
+            return None
+
+        if self.ds.static_url:
+            return os.path.join(
+                self.ds.static_url,
+                self.full_path,
+                ZWP_METADATA_DIR,
+                self._indexes[name]
+            )
+
+        return staticfiles_storage.url('zwp_ds_{}/{}'.format(
+            self.ds.name,
+            os.path.join(
+                self.full_path,
+                ZWP_METADATA_DIR,
+                self._indexes[name]
+            )
+        ))
+
+    def _find_indexes(self):
+        self._indexes = {}
+        indexes = {
+            'tech_spec': re.compile(r'^index([_a-z{2}]*)\.html$'),
+            'parts_index': re.compile(r'^parts-index([_a-z{2}]*)\.html$')
+        }
+        path = os.path.join(self.data_path, ZWP_METADATA_DIR)
+        
+        if not os.path.exists(path):
+            return False
+        
+        from .utils import short_lang
+
+        current_lang = short_lang()
+        tmp = {}
+        is_lang = {k: False for k in indexes}
+
+        for f in os.listdir(path):
+            for name, rx in indexes.items():
+                match = rx.match(f)
+
+                if not match:
+                    continue
+                
+                lang = match.group(1)[1:]
+
+                if lang == current_lang:
+                    self._indexes[name] = f
+                    break
+
+                if tmp.get(name, None) is None:
+                    tmp[name] = f
+                    is_lang[name] = len(lang) > 0
+
+                elif is_lang[name] and not lang:
+                    tmp[name] = f
+
+            if len(self._indexes) == len(indexes):
+                break
+
+        for k, v in tmp.items():
+            if k not in self._indexes:
+                self._indexes[k] = v
+
+
+def index_fn(v, m):
+    @property
+    def method(self):
+        return getattr(self, m)(v)
+    return method
+
+
+for i in ['tech_spec', 'parts_index']:
+     setattr(Directory, 'has_{}'.format(i), index_fn(i, '_find_index'))
+     setattr(Directory, '{}_url'.format(i), index_fn(i, '_index_url'))
 
 
 class Part:

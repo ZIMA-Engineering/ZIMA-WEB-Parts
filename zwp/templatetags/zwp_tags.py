@@ -1,5 +1,6 @@
 from django import template
 from django.http import Http404
+from django.contrib.staticfiles.storage import staticfiles_storage
 from zwp.utils import list_directories
 from zwp.models import Directory
 import os
@@ -55,8 +56,11 @@ def part_thumbnail(part):
 
 @register.simple_tag
 def zwp_static(ds, path):
-    print(ds, path, ds.static_url)
-    return os.path.join(ds.static_url, path)
+    if ds.static_url:
+        return os.path.join(ds.static_url, path)
+    else:
+        return staticfiles_storage.url('zwp_ds_{}/{}'.format(ds.name, path))
+
 
 @register.inclusion_tag('zwp/dir_label.html')
 def dir_label(d):

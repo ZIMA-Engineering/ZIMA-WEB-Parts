@@ -1,5 +1,7 @@
 from django.core.urlresolvers import reverse
+from django.contrib.staticfiles.storage import staticfiles_storage
 import os
+import re
 from .metadata import Metadata
 from .settings import *
 
@@ -19,7 +21,7 @@ class DataSource(object):
 
     @property
     def static_url(self):
-        return self._opts['static_url']
+        return self._opts.get('static_url', None)
 
 
 class Item(object):
@@ -90,6 +92,7 @@ class Directory(Item):
         self._is_dir = True
         self._icon = None
         self._text_icon = None
+        self._tech_spec = None
         self._parts = []
         self._columns = []
         self._parts_meta = {}
@@ -155,7 +158,7 @@ class Directory(Item):
             )
 
         return self._part_thumbnails
-
+    
     def add_part(self, name):
         self._parts.append(Part(self, name))
 

@@ -1,4 +1,5 @@
 from django.conf import settings
+from django.utils import translation
 import os
 from .models import DataSource, Directory
 from .settings import ZWP_METADATA_DIR
@@ -40,3 +41,6 @@ def list_directories(d):
 
     return dirs
 
+
+def short_lang():
+    return translation.get_language().split('-')[0]

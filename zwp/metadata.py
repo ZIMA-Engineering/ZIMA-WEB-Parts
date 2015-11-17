@@ -1,4 +1,3 @@
-from django.utils import translation
 import os
 import configparser
 from .settings import ZWP_METADATA_DIR, ZWP_METADATA_FILE
@@ -6,9 +5,11 @@ from .settings import ZWP_METADATA_DIR, ZWP_METADATA_FILE
 
 class Metadata:
     def __init__(self, d):
+        from .utils import short_lang
+        
         self._dir = d
         self._path = os.path.join(d.data_path, ZWP_METADATA_DIR, ZWP_METADATA_FILE)
-        self._lang = translation.get_language().split('-')[0]
+        self._lang = short_lang()
 
     def exists(self):
         return os.path.exists(self._path)

@@ -5,14 +5,14 @@ navtree here
 
 <p>	
 {% if zwp_parent %}
-  <a href="{{ zwp_parent.url }}">back to {% dir_label zwp_parent %}</a>
+	<a href="{{ zwp_parent.url }}">back to {% dir_label zwp_parent %}</a>
 {% else %}
-  at the top
+	at the top
 {% endif %}
 </p>
 
 <ul>
-  {% for dir in zwp_dirs %}
-    <li><a href="{{ dir.url }}">{% dir_label dir %}</a></li>
-  {% endfor %}
+	{% for dir in zwp_dirs %}
+		<li><a href="{{ dir.url }}">{% dir_label dir %}</a></li>
+	{% endfor %}
 </ul>

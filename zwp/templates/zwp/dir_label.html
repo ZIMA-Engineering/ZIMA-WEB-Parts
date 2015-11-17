@@ -1,9 +1,9 @@
 {% load zwp_tags %}
 {% if dir.icon %}
 	<img
-	src="{% zwp_static dir.ds dir.icon %}"
-	alt="{{ dir.label }}"
-	title="{{ dir.label }}">
+		src="{% zwp_static dir.ds dir.icon %}"
+		alt="{{ dir.label }}"
+		title="{{ dir.label }}">
 {% else %}
 	{% if dir.text_icon %}
 		<img src="{% zwp_static dir.ds dir.text_icon %}">

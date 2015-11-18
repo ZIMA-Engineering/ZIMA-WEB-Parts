@@ -73,8 +73,10 @@ def format_dir(d, path = []):
     }
 
     if d.icon:
-        ret['icon'] = static_url(d.ds, d.icon)
-        ret['text'] = ''
+        ret['text'] = '<img src="{}" alt="{}">'.format(
+            static_url(d.ds, d.icon),
+            d.label
+        )
 
     elif d.text_icon:
         ret['icon'] = static_url(d.ds, d.text_icon)

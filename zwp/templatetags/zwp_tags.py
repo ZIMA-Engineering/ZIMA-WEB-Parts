@@ -1,9 +1,9 @@
 from django import template
 from django.http import Http404
-from django.contrib.staticfiles.storage import staticfiles_storage
-from zwp.utils import list_directories
+from zwp.utils import list_directories, format_dir, static_url
 from zwp.models import Directory
 import os
+import json
 from zwp.settings import *
 
 
@@ -43,9 +43,24 @@ def directory_tree(context):
     return context
 
 
+@register.simple_tag(takes_context=True)
+def zwp_json_tree(context):
+    ret = []
+    d = context['zwp_dir']
+    path = d.full_path.split('/')
+
+    root = Directory(d.ds, '', os.path.basename(d.ds.path), root=True)
+
+    for child in list_directories(root):
+        ret.append(format_dir(child, path))
+
+    return json.dumps(ret);
+
+
 @register.filter
 def part_column(part, n):
     return part.get_column(n)
+
 
 @register.inclusion_tag('zwp/part_thumbnail.html')
 def part_thumbnail(part):
@@ -54,13 +69,10 @@ def part_thumbnail(part):
         'width': ZWP_PART_THUMBNAIL_WIDTH
     }
 
+
 @register.simple_tag
 def zwp_static(ds, path):
-    if ds.static_url:
-        return os.path.join(ds.static_url, path)
-    else:
-        return staticfiles_storage.url('zwp_ds_{}/{}'.format(ds.name, path))
-
+    return static_url(ds, path)
 
 @register.inclusion_tag('zwp/dir_label.html')
 def dir_label(d):

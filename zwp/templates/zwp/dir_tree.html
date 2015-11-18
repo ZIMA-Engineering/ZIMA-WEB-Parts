@@ -1,6 +1,4 @@
 {% load zwp_tags %}
-navtree here
-
 <h2>{% dir_label zwp_dir %}</h2>
 
 <p>	
@@ -13,6 +11,15 @@ navtree here
 
 <ul>
 	{% for dir in zwp_dirs %}
-		<li><a href="{{ dir.url }}">{% dir_label dir %}</a></li>
+	<li><a href="{{ dir.url }}">{% dir_label dir %}</a></li>
 	{% endfor %}
 </ul>
+
+<script type="text/javascript">
+zwp.dirTree(
+	'{{ zwp_dir.ds.name }}',
+	'#zwp-nav',
+	'#zwp-content',
+	{% zwp_json_tree %}
+);
+</script>

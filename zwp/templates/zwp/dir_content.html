@@ -2,44 +2,54 @@
 
 <h2>{{ zwp_dir.label }}</h2>
 
-{% if zwp_dir.has_tech_spec %}
-	<h3>Technical specification</h3>
-	<iframe
-		id="dir-tech-spec"
-		src="{{ zwp_dir.tech_spec_url }}"
-		width="920"
-		onload="this.style.height=this.contentDocument.body.scrollHeight + 20 + 'px';">
-	</iframe>
-{% endif %}
+<div id="tabbar">
+	{# Placeholder for tab menu #}
+</div>
 
-<h3>Parts</h3>
+<div id="tabs">
+	{% if zwp_dir.has_tech_spec %}
+		<div id="tech-spec">
+			<h3>Technical specification</h3>
+			<iframe
+				id="dir-tech-spec"
+				src="{{ zwp_dir.tech_spec_url }}"
+				width="920"
+				onload="this.style.height=this.contentDocument.body.scrollHeight + 20 + 'px';">
+			</iframe>
+		</div>
+	{% endif %}
 
-{% if zwp_dir.has_parts_index %}
-	<iframe
-		id="dir-parts-index"
-		src="{{ zwp_dir.parts_index_url }}"
-		width="920"
-		onload="this.style.height=this.contentDocument.body.scrollHeight + 20 + 'px';">
-	</iframe>
-{% endif %}
+	<div id="parts">
+		<h3>Parts</h3>
 
-<table border="1">
-	<tr>
-		<th>Part</th>
-		<th>Thumbnail</th>
+		{% if zwp_dir.has_parts_index %}
+			<iframe
+				id="dir-parts-index"
+				src="{{ zwp_dir.parts_index_url }}"
+				width="920"
+				onload="this.style.height=this.contentDocument.body.scrollHeight + 20 + 'px';">
+			</iframe>
+		{% endif %}
 
-		{% for c in zwp_dir.columns %}
-			<th>{{ c }}</th>
-		{% endfor %}
-	</tr>
-	{% for part in zwp_dir.parts %}
-		<tr>
-			<td>{{ part.label }}</td>
-			<td>{% part_thumbnail part %}</td>
+		<table border="1">
+			<tr>
+				<th>Part</th>
+				<th>Thumbnail</th>
 
-			{% for c in zwp_dir.columns %}
-				<td>{{ part|part_column:forloop.counter }}</td>
+				{% for c in zwp_dir.columns %}
+					<th>{{ c }}</th>
+				{% endfor %}
+			</tr>
+			{% for part in zwp_dir.parts %}
+				<tr>
+					<td>{{ part.label }}</td>
+					<td>{% part_thumbnail part %}</td>
+
+					{% for c in zwp_dir.columns %}
+						<td>{{ part|part_column:forloop.counter }}</td>
+					{% endfor %}
+				</tr>
 			{% endfor %}
-		</tr>
-	{% endfor %}
-</table>
+		</table>
+	</div>
+</div>

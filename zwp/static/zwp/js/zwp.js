@@ -25,6 +25,14 @@
 
 					if (cb !== undefined)
 						cb();
+					
+					nojsTabs({
+						tabs: document.getElementById('tabs'),
+						titleSelector: 'h3',
+						tabBar: document.getElementById('tabbar'),
+						hiddenClass: 'tab-hidden',
+						activeClass: 'tab-active',
+					});
 				}
 			});
 		}

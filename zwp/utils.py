@@ -45,7 +45,7 @@ def list_directories(d):
 
 def has_children(d):
     for f in os.listdir(d.data_path):
-        if f != '0000-index' and os.path.isdir(os.path.join(d.data_path, f)):
+        if f != ZWP_METADATA_DIR and os.path.isdir(os.path.join(d.data_path, f)):
             return True
 
     return False

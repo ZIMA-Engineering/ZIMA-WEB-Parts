@@ -30,7 +30,7 @@ def list_directories(d):
     dirs = []
     abs_path = d.data_path
 
-    for f in os.listdir(abs_path):
+    for f in sorted(os.listdir(abs_path)):
         item_abs_path = os.path.join(abs_path, f)
 
         if os.path.isdir(item_abs_path):

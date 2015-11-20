@@ -1,6 +1,7 @@
 import os
 import configparser
 from .settings import ZWP_METADATA_DIR, ZWP_METADATA_FILE
+from .signals import part_meta_load
 
 
 class Metadata:
@@ -72,12 +73,15 @@ class Metadata:
 
             part = {}
 
+            for _, data in part_meta_load.send(sender=self.__class__, name=sec, cfg=self.cfg):
+                part.update(data)    
+
             for opt in self.cfg.options(sec):
                 if not opt.isdigit():
                     continue
 
                 part[int(opt)] = self.cfg[sec][opt]
-                
+
             ret[sec] = part
 
         return ret

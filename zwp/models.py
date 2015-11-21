@@ -273,6 +273,7 @@ class Part:
     def __init__(self, d, name):
         self._dir = d
         self._name = name
+        self._metadata = None
    
     @property
     def ds(self):
@@ -296,7 +297,20 @@ class Part:
 
     def get_column(self, n):
         try:
-            return self._dir.metadata_for(self.base_name)[n]
+            return self._meta[n]
 
         except KeyError:
             return None
+
+    @property
+    def _meta(self):
+        if self._metadata:
+            return self._metadata
+
+        try:
+            self._metadata = self._dir.metadata_for(self.base_name)
+
+        except KeyError:
+            self._metadata = {}
+
+        return self._metadata

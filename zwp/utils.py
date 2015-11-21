@@ -6,55 +6,10 @@ from .models import DataSource, Directory
 from .settings import ZWP_METADATA_DIR
 
 
-def resolve_path(ds_name, path):
-    try:
-        ds = DataSource(ds_name, settings.ZWP_DATA_SOURCES[ds_name])
-
-    except KeyError:
-        return False
-
-    is_root = not path
-    abs_path = os.path.abspath(os.path.join(ds.path, path))
-
-    if not abs_path.startswith(ds.path):
-        return False
-
-    return Directory(
-        ds,
-        os.path.dirname(path),
-        os.path.basename(abs_path), root=is_root
-    )
-
-
-def list_directories(d):
-    dirs = []
-    abs_path = d.data_path
-
-    for f in sorted(os.listdir(abs_path)):
-        item_abs_path = os.path.join(abs_path, f)
-
-        if os.path.isdir(item_abs_path):
-            if f != ZWP_METADATA_DIR:
-                dirs.append(Directory(d.ds, d.full_path, f))
-
-        elif os.path.isfile(item_abs_path):
-            d.add_part(f)
-
-    return dirs
-
-
-def has_children(d):
-    for f in os.listdir(d.data_path):
-        if f != ZWP_METADATA_DIR and os.path.isdir(os.path.join(d.data_path, f)):
-            return True
-
-    return False
-
-
 def format_children(d):
     ret = []
 
-    for child in list_directories(d):
+    for child in d.children:
         ret.append(format_dir(child))
 
     return ret
@@ -91,14 +46,14 @@ def format_dir(d, path = []):
             ret['state']['opened'] = True
             ret['children'] = []
 
-            for child in list_directories(d):
+            for child in d.children:
                 ret['children'].append(format_dir(child, target))
 
         else:
-            ret['children'] = has_children(d)
+            ret['children'] = d.has_children
 
     else:
-        ret['children'] = has_children(d)
+        ret['children'] = d.has_children
 
     return ret
 

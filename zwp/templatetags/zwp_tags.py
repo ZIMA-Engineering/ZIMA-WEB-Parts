@@ -1,6 +1,6 @@
 from django import template
 from django.http import Http404
-from zwp.utils import list_directories, format_dir, static_url
+from zwp.utils import format_dir, static_url
 from zwp.models import Directory
 import os
 import json
@@ -33,7 +33,7 @@ def directory_tree(context):
     try:
         context.update({
             'zwp_parent': parent,
-            'zwp_dirs': list_directories(context['zwp_dir'])
+            'zwp_dirs': context['zwp_dir'].children
         })
 
     except FileNotFoundError as e:
@@ -51,7 +51,7 @@ def zwp_json_tree(context):
 
     root = Directory(d.ds, '', os.path.basename(d.ds.path), root=True)
 
-    for child in list_directories(root):
+    for child in root.children:
         ret.append(format_dir(child, path))
 
     return json.dumps(ret);

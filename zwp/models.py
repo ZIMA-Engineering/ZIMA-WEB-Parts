@@ -87,9 +87,35 @@ class Item(object):
 
 
 class Directory(Item):
+    @staticmethod
+    def from_path(ds_name, path, load=False):
+        try:
+            ds = DataSource(ds_name, settings.ZWP_DATA_SOURCES[ds_name])
+
+        except KeyError:
+            return False
+
+        is_root = not path
+        abs_path = os.path.abspath(os.path.join(ds.path, path))
+
+        if not abs_path.startswith(ds.path):
+            return False
+
+        d = Directory(
+            ds,
+            os.path.dirname(path),
+            os.path.basename(abs_path), root=is_root
+        )
+
+        if load:
+            d.load()
+
+        return d
+
     def __init__(self, *args, **kwargs):
         super(Directory, self).__init__(*args, **kwargs)
         self._is_dir = True
+        self._loaded = False
         self._icon = None
         self._text_icon = None
         self._indexes = None
@@ -129,6 +155,24 @@ class Directory(Item):
         return self._text_icon
 
     @property
+    def children(self):
+        if not self._loaded:
+            self.load()
+
+        return self._children
+    
+    @property
+    def has_children(self):
+        if self._loaded:
+            return len(self._children) > 0
+
+        for f in os.listdir(self.data_path):
+            if f != ZWP_METADATA_DIR and os.path.isdir(os.path.join(self.data_path, f)):
+                return True
+
+        return False
+
+    @property
     def parts(self):
         return self._parts
 
@@ -158,6 +202,26 @@ class Directory(Item):
             )
 
         return self._part_thumbnails
+
+    def load(self):
+        if self._loaded:
+            return
+
+        self._children = []
+        abs_path = self.data_path
+
+        for f in sorted(os.listdir(abs_path)):
+            item_abs_path = os.path.join(abs_path, f)
+
+            if os.path.isdir(item_abs_path):
+                if f != ZWP_METADATA_DIR:
+                    self._children.append(Directory(self.ds, self.full_path, f))
+
+            elif os.path.isfile(item_abs_path):
+                self.add_part(f)
+        
+        self._loaded = True
+
 
     def add_part(self, name):
         self._parts.append(Part(self, name))

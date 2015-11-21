@@ -352,6 +352,10 @@ class Part:
         return self._name
 
     @property
+    def name(self):
+        return self._name
+    
+    @property
     def base_name(self):
         return '.'.join(self._name.split('.')[0:-1])
 

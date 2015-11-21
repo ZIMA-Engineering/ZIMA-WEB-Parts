@@ -280,6 +280,10 @@ class Part:
         return self._dir.ds
 
     @property
+    def dir(self):
+        return self._dir
+
+    @property
     def label(self):
         return self._name
 

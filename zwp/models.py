@@ -349,7 +349,7 @@ class Part:
 
     @property
     def label(self):
-        return self._name
+        return self.base_name
 
     @property
     def name(self):

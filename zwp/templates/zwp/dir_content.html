@@ -1,4 +1,4 @@
-{% load zwp_tags %}
+{% load i18n zwp_tags %}
 
 <h2>{{ zwp_dir.label }}</h2>
 
@@ -9,7 +9,7 @@
 <div id="tabs">
 	{% if zwp_dir.has_tech_spec %}
 		<div id="tech-spec">
-			<h3>Technical specification</h3>
+			<h3>{% trans "Technical specification" %}</h3>
 			<iframe
 				id="dir-tech-spec"
 				src="{{ zwp_dir.tech_spec_url }}"
@@ -21,7 +21,7 @@
 
 	{% if zwp_dir.parts %}
 		<div id="parts">
-			<h3>Parts</h3>
+			<h3>{% trans "Parts" %}</h3>
 
 			{% if zwp_dir.has_parts_index %}
 				<iframe
@@ -34,8 +34,8 @@
 
 			<table border="1">
 				<tr>
-					<th>Part</th>
-					<th>Thumbnail</th>
+					<th>{% trans "Part" %}</th>
+					<th>{% trans "Thumbnail" %}</th>
 
 					{% for c in zwp_dir.columns %}
 						<th>{{ c }}</th>

@@ -1,78 +1,62 @@
+from django.views.generic.base import View
 from django.shortcuts import render
 from django.http import HttpResponseForbidden, HttpResponseNotAllowed, JsonResponse, \
-                        HttpResponseRedirect
+                        HttpResponseRedirect, HttpResponseServerError
 from .models import Directory, DownloadBatch
 from .forms import PartDownloadFormSet
 from .utils import format_children, get_or_create_download_batch, get_or_none
 
 
-def show_path(request, ds, path):
-    d = Directory.from_path(ds, path, load=True)
+class DirectoryContentView(View):
+    def dispatch(self, request, ds, path):
+        d = Directory.from_path(ds, path, load=True)
 
-    if d is False:
-        return HttpResponseForbidden()
+        if d is False:
+            return HttpResponseForbidden()
 
-    if request.is_ajax():
-        fetch = request.GET.get('fetch', None)
+        return super(DirectoryContentView, self).dispatch(request, d)
 
-        if fetch == 'tree':
-            return JsonResponse(format_children(d), safe=False)
+    def get(self, request, d):
+        if request.is_ajax():
+            fetch = request.GET.get('fetch', None)
 
-        if fetch == 'content':
-            return render(request, 'zwp/dir_content.html', {
-                'zwp_dir': d
-            })
+            if fetch == 'tree':
+                return JsonResponse(format_children(d), safe=False)
 
-        return HttpResponseForbidden()
+            if fetch == 'content':
+                return render(request, 'zwp/dir_content.html', {
+                    'zwp_dir': d
+                })
 
-    if request.method == 'POST':
-        return download_part(request, d)
-  
-    batch = get_or_none(request.session, 'zwp_download_batch', DownloadBatch)
+            return HttpResponseForbidden()
 
-    part_downloads = batch and {
-        dl.part_model.hash: dl
-        for dl in batch.partdownload_set.select_related('part_model').all()
-    }
-   
-    formset = PartDownloadFormSet(initial=[
-        {
-            'batch': batch,
-            'part': part,
-            'dl': part_downloads and part_downloads.get(part.hash, None),
-        } for part in d.parts
-    ])
+        batch = get_or_none(request.session, 'zwp_download_batch', DownloadBatch)
 
-    return render(request, 'zwp/dir.html', {
-        'zwp_dir': d,
-        'formset': formset,
-    })
+        return render(request, 'zwp/dir.html', {
+            'zwp_dir': d,
+            'formset': self._formset(request, batch, d),
+        })
 
+    def post(self, request, d):
+        batch = get_or_create_download_batch(request.session)
+        formset = self._formset(request, batch, d)
 
-def download_part(request, d):
-    batch = get_or_create_download_batch(request.session)
-    
-    part_downloads = batch and {
-        dl.part_model.hash: dl
-        for dl in batch.partdownload_set.select_related('part_model').all()
-    }
+        if formset.is_valid():
+            formset.save()
+            return HttpResponseRedirect(request.path)
 
-    formset = PartDownloadFormSet(request.POST, initial=[
-        {
-            'batch': batch,
-            'part': part,
-            'dl': part_downloads and part_downloads.get(part.hash, None),
-        } for part in d.parts
-    ])
+        return HttpResponseServerError()
 
-    if formset.is_valid():
-        print('valid, save!')
-        formset.save()
-        return HttpResponseRedirect(request.path)
+    def _formset(self, request, batch, d):
+        part_downloads = batch and {
+            dl.part_model.hash: dl
+            for dl in batch.partdownload_set.select_related('part_model').all()
+        }
 
-    for form in formset:
-        for f in form:
-            if f.errors:
-                print(f.errors)
-
-    return None
+        return PartDownloadFormSet(request.POST or None, initial=[
+            {
+                'batch': batch,
+                'part': part,
+                'dl': part_downloads and part_downloads.get(part.hash, None),
+            } for part in d.parts
+        ])

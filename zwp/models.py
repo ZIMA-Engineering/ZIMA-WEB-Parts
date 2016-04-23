@@ -1,5 +1,8 @@
+from django.db import models
 from django.core.urlresolvers import reverse
 from django.contrib.staticfiles.storage import staticfiles_storage
+from django.utils.translation import ugettext_lazy as _
+import hashlib
 import os
 import re
 from .metadata import Metadata
@@ -338,6 +341,9 @@ class Part:
         self._dir = d
         self._name = name
         self._metadata = None
+
+    def __str__(self):
+        return 'Part {}/{}/{}'.format(self.ds.name, self.dir.full_path, self.name)
    
     @property
     def ds(self):
@@ -360,6 +366,19 @@ class Part:
         return '.'.join(self._name.split('.')[0:-1])
 
     @property
+    def hash(self):
+        print(''.join(os.path.join(
+            self.ds.name,
+            self.dir.full_path,
+            self.name
+        )))
+        return hashlib.sha256(''.join(os.path.join(
+            self.ds.name,
+            self.dir.full_path,
+            self.name
+        )).encode('utf-8')).hexdigest()
+
+    @property
     def thumbnail(self):
         try:
             return self._dir.part_thumbnails[self.base_name]
@@ -373,7 +392,7 @@ class Part:
 
         except KeyError:
             return None
-
+    
     @property
     def _meta(self):
         if self._metadata:
@@ -386,3 +405,68 @@ class Part:
             self._metadata = {}
 
         return self._metadata
+
+
+
+class PartModelManager(models.Manager):
+    def existing(self, hash, part):
+        p = self.get(hash=hash)
+        p.part = part
+        return p
+
+
+class PartModel(models.Model):
+    ds_name = models.CharField(_('data source'), max_length=50)
+    dir_path = models.CharField(_('directory'), max_length=500)
+    name = models.CharField(_('part'), max_length=255)
+    hash = models.CharField(_('hash'), max_length=64, unique=True)
+    objects = PartModelManager()
+
+    @property
+    def part(self):
+        if hasattr(self, '_part'):
+            return self._part
+
+        self._part = None
+        d = Directory.from_path(self.ds_name, self.dir_path, load=True)
+
+        if not d:
+            return None
+        
+        for p in d.parts:
+            if p.name == self.name:
+                self._part = p
+                break
+        
+        return self._part
+
+    @part.setter
+    def part(self, v):
+        self._part = v
+
+    def save(self, *args, **kwargs):
+        if not self.pk:
+            self.hash = hashlib.sha256(''.join(os.path.join(
+                self.ds_name,
+                self.dir_path,
+                self.name
+            )).encode('utf-8')).hexdigest()
+
+        super(PartModel, self).save(*args, **kwargs)
+
+
+class DownloadBatch(models.Model):
+    created_at = models.DateTimeField(_('created at'), auto_now_add=True)
+    updated_at = models.DateTimeField(_('updated at'), null=True)
+   
+    def __str__(self):
+        return 'DownloadBatch #{}'.format(self.pk)
+
+
+class PartDownload(models.Model):
+    download_batch = models.ForeignKey(DownloadBatch)
+    part_model = models.ForeignKey(PartModel)
+    added_at = models.DateTimeField(_('added at'), auto_now_add=True)
+
+    class Meta:
+        unique_together = (('download_batch', 'part_model'),)

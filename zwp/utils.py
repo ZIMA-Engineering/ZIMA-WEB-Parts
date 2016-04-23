@@ -2,7 +2,7 @@ from django.conf import settings
 from django.utils import translation
 from django.contrib.staticfiles.storage import staticfiles_storage
 import os
-from .models import DataSource, Directory
+from .models import DataSource, Directory, DownloadBatch
 from .settings import ZWP_METADATA_DIR
 
 
@@ -67,3 +67,34 @@ def static_url(ds, path):
         return os.path.join(ds.static_url, path)
     else:
         return staticfiles_storage.url('zwp_ds_{}/{}'.format(ds.name, path))
+
+
+def get_or_create_object(session, key, model):
+    if not session.session_key or key not in session:
+        obj = model.objects.create()
+        session[key] = obj.pk
+
+    else:
+        try:
+            obj = model.objects.get(pk=session[key])
+
+        except model.DoesNotExist:
+            obj = model.objects.create()
+            session[key] = obj.pk
+
+    return obj
+
+
+def get_or_create_download_batch(session):
+    return get_or_create_object(session, 'zwp_download_batch', DownloadBatch)
+
+
+def get_or_none(session, key, model):
+    if not session.session_key or key not in session:
+        return None
+
+    try:
+        return model.objects.get(pk=session[key])
+
+    except model.DoesNotExist:
+        return None

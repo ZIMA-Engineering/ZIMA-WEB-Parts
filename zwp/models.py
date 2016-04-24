@@ -1,10 +1,15 @@
-from django.db import models
+from django.db import models, IntegrityError
 from django.core.urlresolvers import reverse
 from django.contrib.staticfiles.storage import staticfiles_storage
 from django.utils.translation import ugettext_lazy as _
+from django.conf import settings
 import hashlib
 import os
+import sys
+import subprocess
 import re
+import random
+import string
 from .metadata import Metadata
 from .settings import *
 
@@ -471,11 +476,42 @@ class PartModel(models.Model):
 
 
 class DownloadBatch(models.Model):
+    OPEN = 0
+    PREPARING = 1
+    DONE = 2
+    ERROR = 3
+    CLOSED = 4
+
+    STATES = (
+        (OPEN, _('Open')),
+        (PREPARING, _('Preparation')),
+        (DONE, _('Done')),
+        (CLOSED, _('Closed')),
+        (ERROR, _('Error')),
+    )
+
+    key = models.CharField(_('unique key'), max_length=40, unique=True)
     created_at = models.DateTimeField(_('created at'), auto_now_add=True)
     updated_at = models.DateTimeField(_('updated at'), null=True)
+    state = models.IntegerField(_('state'), default=OPEN)
+    zip_file = models.CharField(_('zip file'), max_length=255, null=True)
    
     def __str__(self):
         return 'DownloadBatch #{}'.format(self.pk)
+
+    def save(self, *args, **kwargs):
+        if self.pk:
+            return super(DownloadBatch, self).save(*args, **kwargs)
+ 
+        for _ in range(5):
+            try:
+                self.key = self._generate_key(40)
+                return super(DownloadBatch, self).save(*args, **kwargs)
+
+            except IntegrityError:
+                pass
+
+        raise RuntimeError('unable to generate unique key')
 
     @property
     def size(self):
@@ -487,6 +523,25 @@ class DownloadBatch(models.Model):
     @property
     def count(self):
         return self.partdownload_set.all().count()
+
+    @property
+    def zip_url(self):
+        return os.path.join(ZWP_DOWNLOAD_URL, self.zip_file + '.zip')
+
+    def make_zip(self):
+        return subprocess.call([
+            sys.executable,
+            os.path.join(settings.BASE_DIR, 'manage.py'),
+            'makezip',
+            str(self.pk)
+        ]) == 0
+
+    def _generate_key(self, length):
+        return ''.join(
+            random.SystemRandom().choice(string.ascii_letters + string.digits)
+            for _ in range(length)
+        )
+
 
 class PartDownload(models.Model):
     download_batch = models.ForeignKey(DownloadBatch)

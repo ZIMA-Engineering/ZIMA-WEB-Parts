@@ -1,8 +1,10 @@
 from django.views.generic.base import View
-from django.shortcuts import render
+from django.shortcuts import render, get_object_or_404
 from django.http import HttpResponseForbidden, HttpResponseNotAllowed, JsonResponse, \
                         HttpResponseRedirect, HttpResponseServerError, HttpResponseBadRequest
 from django.forms import modelformset_factory
+from django.core.urlresolvers import reverse
+from django.util.translation import ugettext_lazy as _
 from .models import Directory, DownloadBatch, PartDownload
 from .forms import PartDownloadFormSet
 from .utils import format_children, get_or_create_download_batch, get_or_none
@@ -63,7 +65,7 @@ class DirectoryContentView(View):
         ])
 
 
-class DownloadView(View):
+class DownloadsView(View):
     DownloadFormSet = modelformset_factory(
         PartDownload,
         fields=(),
@@ -76,7 +78,7 @@ class DownloadView(View):
 
         return render(request, 'zwp/downloads.html', {
             'batch': batch,
-            'formset': batch and DownloadView.DownloadFormSet(
+            'formset': batch and DownloadsView.DownloadFormSet(
                 queryset=self._queryset(batch)
             ),
         })
@@ -87,16 +89,18 @@ class DownloadView(View):
         if batch is None:
             return HttpResponseBadRequest()
 
-        formset = DownloadView.DownloadFormSet(
+        formset = DownloadsView.DownloadFormSet(
             request.POST,
             queryset=self._queryset(batch)
         )
 
-        print(request.POST)
         if formset.is_valid():
             if 'download' in request.POST:
-                # TODO: create a ZIP file
-                pass
+                if batch.make_zip():
+                    del request.session['zwp_download_batch']
+                    return HttpResponseRedirect(reverse('zwp_download', kwargs={
+                        'key': batch.key,
+                    }))
 
             elif 'update' in request.POST:
                 formset.save()
@@ -114,3 +118,14 @@ class DownloadView(View):
     def _queryset(self, batch):
         return batch.partdownload_set.select_related('part_model').all() \
             .order_by('part_model__name')
+
+
+def download(request, key):
+    batch = get_object_or_404(
+        DownloadBatch,
+        key=key
+    )
+
+    return render(request, 'zwp/download.html', {
+        'batch': batch,
+    })

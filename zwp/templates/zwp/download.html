@@ -1,0 +1,37 @@
+{% extends "zwp/base.html" %}
+{% load i18n zwp_tags %}
+
+{% block tables_active %}{% endblock %}
+{% block downloads_active %}active{% endblock %}
+
+{% block head %}
+{% if batch.state == batch.PREPARING %}
+	<meta http-equiv="refresh" content="3">
+{% endif %}
+{% endblock %}
+
+{% block content %}
+{% if batch.state == batch.PREPARING %}
+	<p>
+	{% blocktrans trimmed %}
+	The ZIP file is being prepared. Please wait, this page will automatically
+	refresh.
+	{% endblocktrans %}
+	</p>
+
+{% elif batch.state == batch.DONE %}
+	<p class="text-center">
+		{% trans "The ZIP file is ready for download:" %}<br><br>
+		<a href="{{ batch.zip_url }}">
+			<button class="btn btn-primary">
+				{% blocktrans trimmed with f=batch.zip_file %}
+				Download {{ f }}.zip
+				{% endblocktrans %}
+			</button>
+		</a>
+	</p>
+
+{% else %}
+<p>{% trans "An error has occurred. Please try again." %}</p>
+{% endif %}
+{% endblock %}

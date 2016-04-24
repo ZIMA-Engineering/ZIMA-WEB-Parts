@@ -21,6 +21,9 @@ class DirectoryContentView(View):
         return super(DirectoryContentView, self).dispatch(request, d)
 
     def get(self, request, d):
+        batch = get_or_none(request.session, 'zwp_download_batch', DownloadBatch)
+        formset = self._formset(request, batch, d)
+
         if request.is_ajax():
             fetch = request.GET.get('fetch', None)
 
@@ -29,16 +32,15 @@ class DirectoryContentView(View):
 
             if fetch == 'content':
                 return render(request, 'zwp/dir_content.html', {
-                    'zwp_dir': d
+                    'zwp_dir': d,
+                    'formset': formset,
                 })
 
             return HttpResponseForbidden()
 
-        batch = get_or_none(request.session, 'zwp_download_batch', DownloadBatch)
-
         return render(request, 'zwp/dir.html', {
             'zwp_dir': d,
-            'formset': self._formset(request, batch, d),
+            'formset': formset,
         })
 
     def post(self, request, d):

@@ -4,7 +4,8 @@ from django.http import HttpResponseForbidden, HttpResponseNotAllowed, JsonRespo
                         HttpResponseRedirect, HttpResponseServerError, HttpResponseBadRequest
 from django.forms import modelformset_factory
 from django.core.urlresolvers import reverse
-from django.util.translation import ugettext_lazy as _
+from django.utils.translation import ugettext_lazy as _
+from django.contrib import messages
 from .models import Directory, DownloadBatch, PartDownload
 from .forms import PartDownloadFormSet
 from .utils import format_children, get_or_create_download_batch, get_or_none
@@ -101,6 +102,13 @@ class DownloadsView(View):
                     return HttpResponseRedirect(reverse('zwp_download', kwargs={
                         'key': batch.key,
                     }))
+
+                else:
+                    messages.error(
+                        request,
+                        _('Unable to generate the ZIP file. Please try again or contact '+
+                           'the provider for support.')
+                    )
 
             elif 'update' in request.POST:
                 formset.save()

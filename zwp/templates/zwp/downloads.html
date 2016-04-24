@@ -1,0 +1,62 @@
+{% extends "zwp/base.html" %}
+{% load i18n zwp_tags %}
+
+{% block tables_active %}{% endblock %}
+{% block downloads_active %}active{% endblock %}
+
+{% block content %}
+{% if batch %}
+	<form action="" method="post">
+		{{ formset.management_form }}
+		{% csrf_token %}
+		<table class="table">
+			<tr>
+				<th>{% trans "Part" %}</th>
+				<th>{% trans "Thumbnail" %}</th>
+				<th>{% trans "Size" %}</th>
+				{% if formset.can_delete %}
+					<th>{% trans "Delete" %}</th>
+				{% endif %}
+			</tr>
+
+			{% for form in formset %}
+				<tr>
+					<td>{{ form.instance.part_model.name }}</td>
+					<td>{% part_thumbnail form.part %}</td>
+					<td>{{ form.instance.part_model.part.size|filesizeformat }}</td>
+					<td>
+						{% for hidden in form.hidden_fields %}
+							{{ hidden }}
+						{% endfor %}
+						{% if formset.can_delete %}
+							{{ form.DELETE }}
+						{% endif %}
+					</td>
+				</tr>
+			{% endfor %}
+
+			<tr>
+				<th colspan="2">
+					{% blocktrans trimmed count cnt=batch.count %}
+						{{ cnt }} part
+					{% plural %}
+						{{ cnt }} parts
+					{% endblocktrans %}
+				</th>
+				<th colspan="2">{% trans "Total size" %}: {{ batch.size|filesizeformat }}</th>
+			</tr>
+			<tr>
+				<td colspan="2"></td>
+				<td>
+					<input type="submit" name="download" value="{% trans "Download" %}" class="btn btn-default">
+				</td>
+				<td>
+					<input type="submit" name="update" value="{% trans "Update" %}" class="btn btn-default">
+				</td>
+			</tr>
+		</table>
+	</form>
+{% else %}
+	<p>{% trans "Mark some parts for download first." %}</p>
+{% endif %}
+{% endblock %}

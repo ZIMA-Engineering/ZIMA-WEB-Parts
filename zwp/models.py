@@ -366,6 +366,13 @@ class Part:
         return '.'.join(self._name.split('.')[0:-1])
 
     @property
+    def data_path(self):
+        return os.path.join(
+            self.dir.data_path,
+            self.name,
+        )
+
+    @property
     def hash(self):
         print(''.join(os.path.join(
             self.ds.name,
@@ -377,6 +384,14 @@ class Part:
             self.dir.full_path,
             self.name
         )).encode('utf-8')).hexdigest()
+    
+    @property
+    def size(self):
+        if hasattr(self, '_size'):
+            return self._size
+
+        self._size = os.stat(self.data_path).st_size
+        return self._size
 
     @property
     def thumbnail(self):
@@ -462,6 +477,16 @@ class DownloadBatch(models.Model):
     def __str__(self):
         return 'DownloadBatch #{}'.format(self.pk)
 
+    @property
+    def size(self):
+        return sum([
+            dl.part_model.part.size
+            for dl in self.partdownload_set.select_related('part_model').all()
+        ])
+
+    @property
+    def count(self):
+        return self.partdownload_set.all().count()
 
 class PartDownload(models.Model):
     download_batch = models.ForeignKey(DownloadBatch)

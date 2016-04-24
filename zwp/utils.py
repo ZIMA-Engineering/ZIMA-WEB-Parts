@@ -59,7 +59,12 @@ def format_dir(d, path = []):
 
 
 def short_lang():
-    return translation.get_language().split('-')[0]
+    lang = translation.get_language()
+
+    if lang is None:
+        return 'en'
+
+    return lang.split('-')[0]
 
 
 def static_url(ds, path):

@@ -3,6 +3,7 @@ from django.core.urlresolvers import reverse
 from django.contrib.staticfiles.storage import staticfiles_storage
 from django.utils.translation import ugettext_lazy as _
 from django.conf import settings
+from django.contrib.auth.models import User
 import hashlib
 import os
 import sys
@@ -490,6 +491,7 @@ class DownloadBatch(models.Model):
         (ERROR, _('Error')),
     )
 
+    user = models.ForeignKey(User, null=True, blank=True)
     key = models.CharField(_('unique key'), max_length=40, unique=True)
     created_at = models.DateTimeField(_('created at'), auto_now_add=True)
     updated_at = models.DateTimeField(_('updated at'), null=True)

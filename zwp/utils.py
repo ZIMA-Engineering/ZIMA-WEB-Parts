@@ -74,9 +74,14 @@ def static_url(ds, path):
         return staticfiles_storage.url('zwp_ds_{}/{}'.format(ds.name, path))
 
 
-def get_or_create_object(session, key, model):
+def get_or_create_object(session, key, model, user=None):
+    kwargs = {}
+
+    if user and user.is_authenticated():
+        kwargs['user'] = user
+
     if not session.session_key or key not in session:
-        obj = model.objects.create()
+        obj = model.objects.create(**kwargs)
         session[key] = obj.pk
 
     else:
@@ -84,14 +89,19 @@ def get_or_create_object(session, key, model):
             obj = model.objects.get(pk=session[key])
 
         except model.DoesNotExist:
-            obj = model.objects.create()
+            obj = model.objects.create(**kwargs)
             session[key] = obj.pk
 
     return obj
 
 
-def get_or_create_download_batch(session):
-    return get_or_create_object(session, 'zwp_download_batch', DownloadBatch)
+def get_or_create_download_batch(request):
+    return get_or_create_object(
+        request.session,
+        'zwp_download_batch',
+        DownloadBatch,
+        user=request.user
+    )
 
 
 def get_or_none(session, key, model):

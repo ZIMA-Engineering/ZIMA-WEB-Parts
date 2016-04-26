@@ -4,6 +4,7 @@ from django.http import HttpResponseForbidden, HttpResponseNotAllowed, JsonRespo
                         HttpResponseRedirect, HttpResponseServerError, HttpResponseBadRequest
 from django.forms import modelformset_factory
 from django.core.urlresolvers import reverse
+from django.core.exceptions import PermissionDenied
 from django.utils.translation import ugettext_lazy as _
 from django.contrib import messages
 from .models import Directory, DownloadBatch, PartDownload
@@ -44,7 +45,7 @@ class DirectoryContentView(View):
         })
 
     def post(self, request, d):
-        batch = get_or_create_download_batch(request.session)
+        batch = get_or_create_download_batch(request)
         formset = self._formset(request, batch, d)
 
         if formset.is_valid():
@@ -135,6 +136,9 @@ def download(request, key):
         DownloadBatch,
         key=key
     )
+
+    if batch.user and batch.user != request.user:
+        raise PermissionDenied()
 
     return render(request, 'zwp/download.html', {
         'batch': batch,

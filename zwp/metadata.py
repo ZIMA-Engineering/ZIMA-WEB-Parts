@@ -1,6 +1,6 @@
 import os
 import configparser
-from .settings import ZWP_METADATA_DIR, ZWP_METADATA_FILE
+from .settings import ZWP_METADATA_DIR, ZWP_METADATA_FILE, ZWP_USERS_FILE
 from .signals import part_meta_load
 
 
@@ -85,3 +85,23 @@ class Metadata:
             ret[sec] = part
 
         return ret
+
+
+class Users:
+    def __init__(self, ds):
+        self._path = os.path.join(ds.path, ZWP_METADATA_DIR, ZWP_USERS_FILE)
+        self.parse()
+    
+    def parse(self):
+        if os.path.exists(self._path):
+            self.cfg = configparser.ConfigParser()
+            self.cfg.read(self._path)
+
+        else:
+            self.cfg = None
+    
+    def authenticate(self, username, password):
+        return self.cfg is not None and \
+            self.cfg.has_section(username) and \
+            self.cfg.has_option(username, 'password') and \
+            self.cfg[username]['password'] == password

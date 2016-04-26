@@ -1,3 +1,4 @@
+from django.core.exceptions import PermissionDenied
 import os
 import configparser
 from .settings import ZWP_METADATA_DIR, ZWP_METADATA_FILE, ZWP_USERS_FILE
@@ -101,7 +102,11 @@ class Users:
             self.cfg = None
     
     def authenticate(self, username, password):
-        return self.cfg is not None and \
-            self.cfg.has_section(username) and \
-            self.cfg.has_option(username, 'password') and \
-            self.cfg[username]['password'] == password
+        if self.cfg is None or not self.cfg.has_section(username):
+            return False
+
+        if self.cfg.has_option(username, 'password') and \
+            self.cfg[username]['password'] == password:
+            return True
+
+        raise PermissionDenied()

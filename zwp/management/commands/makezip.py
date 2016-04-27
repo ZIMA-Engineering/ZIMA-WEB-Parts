@@ -1,4 +1,5 @@
 from django.core.management.base import BaseCommand, CommandError
+from django.conf import settings
 import os
 import sys
 from zipfile import ZipFile
@@ -40,8 +41,9 @@ class Command(BaseCommand):
 
         zip_name, zip_path = self.zip_name(batch)
 
-        import time
-        time.sleep(10)
+        if settings.DEBUG:
+            import time
+            time.sleep(10)
 
         with ZipFile(zip_path, 'w') as zip:
             for dl in dls:

@@ -1,5 +1,6 @@
 from django import template
 from django.http import Http404
+from django.utils.safestring import mark_safe
 from zwp.utils import format_dir, static_url
 from zwp.models import Directory
 import os
@@ -54,7 +55,7 @@ def zwp_json_tree(context):
     for child in root.children:
         ret.append(format_dir(child, path))
 
-    return json.dumps(ret);
+    return mark_safe(json.dumps(ret))
 
 
 @register.filter

@@ -24,6 +24,10 @@ class DataSource(object):
         return self._opts['name']
 
     @property
+    def label(self):
+        return self._opts.get('label', self._opts['name'])
+
+    @property
     def path(self):
         return self._opts['path']
 

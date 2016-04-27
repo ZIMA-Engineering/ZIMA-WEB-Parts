@@ -32,6 +32,10 @@ class DataSource(object):
         return self._opts['path']
 
     @property
+    def url(self):
+        return reverse('zwp_dir', args=(self.name, ''))
+
+    @property
     def static_url(self):
         return self._opts.get('static_url', None)
 

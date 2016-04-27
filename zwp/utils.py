@@ -2,6 +2,7 @@ from django.conf import settings
 from django.utils import translation
 from django.contrib.staticfiles.storage import staticfiles_storage
 import os
+import sys
 from .models import DataSource, Directory, DownloadBatch
 from .settings import ZWP_METADATA_DIR
 
@@ -113,3 +114,20 @@ def get_or_none(session, key, model):
 
     except model.DoesNotExist:
         return None
+
+
+def find_interpreter():
+    """
+    Attempt to locate the Python interpreter. sys.executable is not useful
+    if the application is running e.g. under uwsgi.
+
+    For example, if os.__file__ returns something like '/usr/lib64/python3.4/os.py',
+    the interpreter should be located at ../../bin/python. If that is not the case,
+    it reverts to sys.executable.
+    """
+    path = os.path.join(os.path.dirname(os.__file__), '..', '..', 'bin', 'python')
+
+    if os.path.exists(path):
+        return path
+
+    return sys.executable

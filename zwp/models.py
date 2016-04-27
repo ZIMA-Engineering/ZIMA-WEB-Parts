@@ -544,8 +544,10 @@ class DownloadBatch(models.Model):
         return os.path.join(ZWP_DOWNLOAD_URL, self.zip_file + '.zip')
 
     def make_zip(self):
+        from .utils import find_interpreter
+
         return subprocess.call([
-            sys.executable,
+            find_interpreter(),
             os.path.join(settings.BASE_DIR, 'manage.py'),
             'makezip',
             str(self.pk)

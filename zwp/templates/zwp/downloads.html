@@ -21,7 +21,11 @@
 
 			{% for form in formset %}
 				<tr>
-					<td>{{ form.instance.part_model.name }}</td>
+					<td>
+						<a href="{{ form.instance.part_model.part.dir.url }}#parts">
+							{{ form.instance.part_model.name }}
+						</a>
+					</td>
 					<td>{% part_thumbnail form.part %}</td>
 					<td>{{ form.instance.part_model.part.size|filesizeformat }}</td>
 					<td>

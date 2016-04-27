@@ -17,11 +17,21 @@ class PartModelForm(forms.ModelForm):
             'dir_path': HiddenInput(),
             'name': HiddenInput()
         }
-    
+
+    def __init__(self, *args, user=None, **kwargs):
+        super(PartModelForm, self).__init__(*args, **kwargs)
+
+        self.user = user
+
     def clean(self):
         data = super(PartModelForm, self).clean()
 
-        self.dir = Directory.from_path(data['ds_name'], data['dir_path'], load=True)
+        self.dir = Directory.from_path(
+            data['ds_name'],
+            data['dir_path'],
+            load=True,
+            user=self.user
+        )
 
         if not self.dir:
             raise forms.ValidationError('invalid data source or directory')
@@ -59,9 +69,10 @@ class PartDownloadForm(forms.ModelForm):
         model = PartDownload
         fields = ()
     
-    def __init__(self, data=None, initial={}, *args, **kwargs):
+    def __init__(self, data=None, initial={}, user=None, *args, **kwargs):
         part_initial = {}
 
+        self.user = user
         self.download_batch = initial['batch']
         self.part = initial['part']
         part_initial = {
@@ -79,7 +90,7 @@ class PartDownloadForm(forms.ModelForm):
         else:
             self.dl = None
 
-        self.part_form = PartModelForm(initial=part_initial)
+        self.part_form = PartModelForm(initial=part_initial, user=user)
 
         if data:
             args = list(args)
@@ -95,7 +106,13 @@ class PartDownloadForm(forms.ModelForm):
             if data and f in data:
                 part_data[f] = data[f]
 
-        self.part_form = PartModelForm(part_data)
+        self.part_form = PartModelForm(part_data, user=self.user)
+        self.part_form.full_clean()
+
+        if self.cleaned_data['download'] and not self.part_form.part.accessible:
+            raise forms.ValidationError(
+                "part '{}' is not available for download".format(self.part_form.part.name)
+            )
 
         return data
     

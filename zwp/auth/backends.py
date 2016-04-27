@@ -2,6 +2,7 @@ from django.conf import settings
 from django.contrib.auth.models import User
 from zwp.models import DataSource
 from zwp.metadata import Users
+from zwp.auth import data_sources
 
 
 class DataSourceBackend(object):
@@ -9,10 +10,7 @@ class DataSourceBackend(object):
     Authenticate agains users defined in users.ini in the data directory.
     """
     def authenticate(self, username=None, password=None):
-        for ds, opts in filter(
-            lambda v: v[1].get('auth', False),
-            settings.ZWP_DATA_SOURCES.items()
-        ):
+        for ds, opts in data_sources():
             u = Users(DataSource(ds, opts))
 
             if u.authenticate(username, password):

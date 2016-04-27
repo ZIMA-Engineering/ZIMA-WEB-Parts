@@ -11,7 +11,7 @@ import subprocess
 import re
 import random
 import string
-from .metadata import Metadata
+from .metadata import Users, Metadata
 from .settings import *
 
 
@@ -34,7 +34,7 @@ class DataSource(object):
 
 
 class Item(object):
-    def __init__(self, ds, path, name, root=False):
+    def __init__(self, ds, path, name, root=False, user=None):
         self._ds = ds
         self._path = path
         self._name = name
@@ -42,7 +42,8 @@ class Item(object):
         self._children = []
         self._is_dir = False
         self._is_root = root
-
+        self.user = user
+        return
         print("new {}: ds={}, path={}, name={}".format(
             self.__class__.__name__,
             self.ds.name,
@@ -97,7 +98,7 @@ class Item(object):
 
 class Directory(Item):
     @staticmethod
-    def from_path(ds_name, path, load=False):
+    def from_path(ds_name, path, load=False, user=None):
         try:
             ds = DataSource(ds_name, settings.ZWP_DATA_SOURCES[ds_name])
 
@@ -113,7 +114,9 @@ class Directory(Item):
         d = Directory(
             ds,
             os.path.dirname(path),
-            os.path.basename(abs_path), root=is_root
+            os.path.basename(abs_path),
+            root=is_root,
+            user=user
         )
 
         if load:
@@ -233,7 +236,15 @@ class Directory(Item):
 
 
     def add_part(self, name):
-        self._parts.append(Part(self, name))
+        allowed = False
+        
+        if self.user:
+            for fmt_rx in self.user.part_access[self.ds.name]:
+                if fmt_rx.search(name):
+                    allowed = True
+                    break
+
+        self._parts.append(Part(self, name, allowed))
 
     def metadata_for(self, name):
         return self._parts_meta[name]
@@ -343,9 +354,10 @@ for i in ['tech_spec', 'parts_index']:
 
 
 class Part:
-    def __init__(self, d, name):
+    def __init__(self, d, name, accessible):
         self._dir = d
         self._name = name
+        self.accessible = accessible
         self._metadata = None
 
     def __str__(self):
@@ -426,7 +438,6 @@ class Part:
             self._metadata = {}
 
         return self._metadata
-
 
 
 class PartModelManager(models.Manager):

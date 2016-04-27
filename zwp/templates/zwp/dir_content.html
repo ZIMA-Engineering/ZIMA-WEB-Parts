@@ -2,7 +2,7 @@
 
 <h2>{{ zwp_dir.label }}</h2>
 
-<div id="tabbar">
+<div class="nav nav-tabs" id="tabbar">
 	{# Placeholder for tab menu #}
 </div>
 
@@ -27,7 +27,7 @@
 				<iframe
 					id="dir-parts-index"
 					src="{{ zwp_dir.parts_index_url }}"
-					width="920"
+					width="100%"
 					onload="this.style.height=this.contentDocument.body.scrollHeight + 20 + 'px';">
 				</iframe>
 			{% endif %}
@@ -46,15 +46,28 @@
 						{% endfor %}
 					</tr>
 					{% for form in formset %}
+						{% if form.non_field_errors %}
+							<tr>
+								<td colspan="3">
+									<ul>
+										{% for error in form.non_field_errors %}
+											<li>{{ error }}</li>
+										{% endfor %}
+									</ul>
+								</td>
+							</tr>
+						{% endif %}
 						<tr>
 							<td>
 								{% for hidden in form.hidden_fields %}
 									{{ hidden }}
 								{% endfor %}
 
-								{{ form.download }}
+								{% if form.part.accessible %}
+									{{ form.download }}
+								{% endif %}
 							</td>
-							<td>{{ form.part.label }}</td>
+							<td>{{ form.part.name }}</td>
 							<td>{% part_thumbnail form.part %}</td>
 
 							{% for c in zwp_dir.columns %}
@@ -63,8 +76,8 @@
 						</tr>
 					{% endfor %}
 						<tr>
-							<td colspan="3">
-								<input type="submit" value="{% trans "Mark for download" %}">
+							<td colspan="2">
+								<input type="submit" value="{% trans "Mark for download" %}" class="btn btn-default">
 							</td>
 						</tr>
 				</table>

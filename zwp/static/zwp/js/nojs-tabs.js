@@ -2,7 +2,7 @@
 	var nojsTabs = function (opts) {
 		this.opts = opts;
 
-		var ul = document.createElement('UL');
+		var ul = this.createElement(document.createElement('UL'));
 		var tabNum = opts.tabs.children.length;
 
 		for (var i = 0; i < tabNum; i++) {
@@ -26,13 +26,23 @@
 		};
 	};
 
-	nojsTabs.Version = '0.1.0';
+	nojsTabs.Version = '0.2.0';
+
+	nojsTabs.prototype.createElement = function (el) {
+		if (this.opts.createElement !== undefined) {
+			var ret = this.opts.createElement(el);
+			
+			return ret === undefined ? el : ret;
+		}
+
+		return el;
+	}
 
 	nojsTabs.prototype.createTab = function (tab) {
-		var li = document.createElement('LI');
+		var li = this.createElement(document.createElement('LI'));
 		li.id = 'tab-anchor-' + tab.id;
 		
-		var a = document.createElement('A');
+		var a = this.createElement(document.createElement('A'));
 		var a_text = document.createTextNode(this.getTitle(tab));
 
 		a.href = '#' + tab.id;
@@ -50,6 +60,13 @@
 		li.appendChild(a);
 
 		tab.tabAnchor = li;
+		tab.tabAnchor.activate = function () {
+			that.activate([this]);
+		};
+		
+		tab.tabAnchor.deactivate = function () {
+			that.deactivate([this]);
+		};
 	
 		return li;
 	};

@@ -1,6 +1,23 @@
 (function() {
 	window.zwp = {};
 	
+	zwp.setupContentTabs = function () {
+		nojsTabs({
+			tabs: document.getElementById('tabs'),
+			titleSelector: 'h3',
+			tabBar: document.getElementById('tabbar'),
+			hiddenClass: 'tab-hidden',
+			activeClass: 'active',
+			createElement: function(el) {
+				if (el.tagName == 'UL')
+					el.classList.add('nav', 'nav-tabs');
+
+				else if(el.tagName == 'LI')
+					el.setAttribute('role', 'presentation');
+			},
+		});
+	};
+
 	zwp.dirTree = function(ds, treeElement, contentElement, initialData) {
 		function requestErrorHandler(xhr, state, error) {
 			console.log('Request failed:', state, error);
@@ -26,13 +43,7 @@
 					if (cb !== undefined)
 						cb();
 					
-					nojsTabs({
-						tabs: document.getElementById('tabs'),
-						titleSelector: 'h3',
-						tabBar: document.getElementById('tabbar'),
-						hiddenClass: 'tab-hidden',
-						activeClass: 'tab-active',
-					});
+					zwp.setupContentTabs();
 				}
 			});
 		}

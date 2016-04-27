@@ -13,8 +13,8 @@ class PartAccessMiddleware:
         else:
             username = None
 
-        for ds, opts in settings.ZWP_DATA_SOURCES.items():
-            u = Users(DataSource(ds, opts))
-            part_access[ds] = list(u.get_parts(username))
+        for opts in settings.ZWP_DATA_SOURCES:
+            u = Users(DataSource(opts))
+            part_access[ opts['name'] ] = list(u.get_parts(username))
 
         request.user.part_access = part_access

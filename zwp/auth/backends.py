@@ -10,8 +10,8 @@ class DataSourceBackend(object):
     Authenticate agains users defined in users.ini in the data directory.
     """
     def authenticate(self, username=None, password=None):
-        for ds, opts in data_sources():
-            u = Users(DataSource(ds, opts))
+        for opts in data_sources():
+            u = Users(DataSource(opts))
 
             if u.authenticate(username, password):
                 try:

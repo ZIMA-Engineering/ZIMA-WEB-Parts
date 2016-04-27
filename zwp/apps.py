@@ -12,7 +12,7 @@ class ZwpConfig(AppConfig):
 
         static_dirs = list(settings.STATICFILES_DIRS)
 
-        for name, opts in settings.ZWP_DATA_SOURCES.items():
-            static_dirs.append(('zwp_ds_{}'.format(name), opts['path']))
+        for ds in settings.ZWP_DATA_SOURCES:
+            static_dirs.append(('zwp_ds_{}'.format(ds['name']), ds['path']))
 
         setattr(settings, 'STATICFILES_DIRS', static_dirs)

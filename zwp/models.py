@@ -16,13 +16,12 @@ from .settings import *
 
 
 class DataSource(object):
-    def __init__(self, name, opts):
-        self._name = name
+    def __init__(self, opts):
         self._opts = opts
 
     @property
     def name(self):
-        return self._name
+        return self._opts['name']
 
     @property
     def path(self):
@@ -99,10 +98,13 @@ class Item(object):
 class Directory(Item):
     @staticmethod
     def from_path(ds_name, path, load=False, user=None):
-        try:
-            ds = DataSource(ds_name, settings.ZWP_DATA_SOURCES[ds_name])
+        ds = None
 
-        except KeyError:
+        for opts in settings.ZWP_DATA_SOURCES:
+            if opts['name'] == ds_name:
+                ds = DataSource(opts)
+                break
+        else:
             return False
 
         is_root = not path

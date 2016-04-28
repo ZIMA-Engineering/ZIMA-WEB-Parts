@@ -1,5 +1,6 @@
 from django.core.management.base import BaseCommand, CommandError
 from django.conf import settings
+from django.utils import timezone
 import os
 import sys
 from zipfile import ZipFile
@@ -55,6 +56,7 @@ class Command(BaseCommand):
                 )
 
         batch.zip_file = zip_name
+        batch.updated_at = timezone.now()
 
     def daemonize(self):
         from django.db import connection

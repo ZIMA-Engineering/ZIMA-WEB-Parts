@@ -18,6 +18,28 @@
 		});
 	};
 
+	zwp.setupPartCheckBoxes = function (parts) {
+		$(parts).find('table').each(function () {
+			var table = this;
+
+			$(table).find('th.checkall').each(function () {
+				$(this).append(
+					$('<input type="checkbox" class="checkall">').change(function () {
+						var checkall = this;
+						var checked = this.checked;
+
+						$(table).find('input[type="checkbox"]').each(function () {
+							if (this == checkall)
+								return;
+
+							this.checked = checked;
+						});
+					})
+				);
+			});
+		});
+	}
+
 	zwp.dirTree = function(ds, treeElement, contentElement, initialData) {
 		function requestErrorHandler(xhr, state, error) {
 			console.log('Request failed:', state, error);
@@ -44,6 +66,7 @@
 						cb();
 					
 					zwp.setupContentTabs();
+					zwp.setupPartCheckBoxes(contentElement);
 				}
 			});
 		}

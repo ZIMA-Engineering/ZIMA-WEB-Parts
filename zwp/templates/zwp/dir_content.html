@@ -37,7 +37,7 @@
 				{% csrf_token %}
 				<table class="table table-striped table-hover">
 					<tr>
-						<th></th>
+						<th class="checkall"></th>
 						<th>{% trans "Part" %}</th>
 						<th>{% trans "Thumbnail" %}</th>
 
@@ -76,7 +76,8 @@
 						</tr>
 					{% endfor %}
 						<tr>
-							<td colspan="2">
+							<th class="checkall"></th>
+							<td>
 								<input type="submit" value="{% trans "Mark for download" %}" class="btn btn-default">
 							</td>
 						</tr>

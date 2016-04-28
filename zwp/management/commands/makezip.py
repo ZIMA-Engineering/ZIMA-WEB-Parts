@@ -39,11 +39,13 @@ class Command(BaseCommand):
         dls = batch.partdownload_set.select_related('part_model').all() \
                 .order_by('part_model__name')
 
-        zip_name, zip_path = self.zip_name(batch)
+        zip_name, zip_dir, zip_path = self.zip_name(batch)
 
         if settings.DEBUG:
             import time
             time.sleep(10)
+
+        os.makedirs(zip_dir, exist_ok=True)
 
         with ZipFile(zip_path, 'w') as zip:
             for dl in dls:
@@ -70,4 +72,5 @@ class Command(BaseCommand):
 
     def zip_name(self, batch):
         name = 'parts-{}'.format(batch.pk)
-        return name, os.path.join(ZWP_DOWNLOAD_ROOT, name + '.zip')
+        d = os.path.join(ZWP_DOWNLOAD_ROOT, batch.key)
+        return name, d, os.path.join(d, name + '.zip')

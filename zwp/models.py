@@ -551,6 +551,10 @@ class DownloadBatch(models.Model):
     def zip_url(self):
         return os.path.join(ZWP_DOWNLOAD_URL, self.zip_file + '.zip')
 
+    @property
+    def zip_size(self):
+        return os.stat(os.path.join(ZWP_DOWNLOAD_ROOT, self.zip_file + '.zip')).st_size
+
     def make_zip(self):
         from .utils import find_interpreter
 

@@ -24,8 +24,8 @@
 		{% trans "The ZIP file is ready for download:" %}<br><br>
 		<a href="{{ batch.zip_url }}">
 			<button class="btn btn-primary">
-				{% blocktrans trimmed with f=batch.zip_file %}
-				Download {{ f }}.zip
+				{% blocktrans trimmed with file=batch.zip_file size=batch.zip_size|filesizeformat %}
+				Download {{ file }}.zip ({{ size }})
 				{% endblocktrans %}
 			</button>
 		</a>

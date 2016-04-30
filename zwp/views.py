@@ -50,6 +50,28 @@ class DirectoryContentView(View):
 
         if formset.is_valid():
             formset.save()
+
+            if formset.marked > 0 and formset.unmarked == 0:
+                messages.info(
+                    request,
+                    _('Marked {} files for download.').format(formset.marked)
+                )
+
+            elif formset.marked == 0 and formset.unmarked > 0:
+                messages.info(
+                    request,
+                    _('Unmarked {} files for download.').format(formset.unmarked)
+                )
+            
+            else:
+                messages.info(
+                    request,
+                    _('Marked {marked} files for download, unmarked {unmarked} files.').format(
+                        marked=formset.marked,
+                        unmarked=formset.unmarked
+                    )
+                )
+
             return HttpResponseRedirect(request.path)
 
         return render(request, 'zwp/dir.html', {

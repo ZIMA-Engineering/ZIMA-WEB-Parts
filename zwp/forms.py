@@ -128,7 +128,7 @@ class PartDownloadForm(forms.ModelForm):
             else:
                 # The part is not marked for download _now_, but has been marked before
                 self.dl.delete()
-                return None
+                return -1
 
         if self.dl:
             # The file is already marked for download, nothing to do
@@ -147,6 +147,8 @@ class PartDownloadForm(forms.ModelForm):
             except IntegrityError as e:
                 raise e  # FIXME
 
+        return 1
+
 
 class BasePartDownloadFormSet(BaseFormSet):
     def add_fields(self, form, index):
@@ -156,9 +158,19 @@ class BasePartDownloadFormSet(BaseFormSet):
             form.fields[name] = f
 
     def save(self):
+        self.marked = 0
+        self.unmarked = 0
+
         with transaction.atomic():
             for form in self.forms:
-                form.save()
+                ret = form.save()
+                print('ret:', ret)
+
+                if ret == 1:
+                    self.marked += 1
+
+                elif ret == -1:
+                    self.unmarked += 1
 
 
 PartDownloadFormSet = formset_factory(

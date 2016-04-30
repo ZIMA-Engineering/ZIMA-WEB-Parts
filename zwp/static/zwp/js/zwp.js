@@ -41,6 +41,8 @@
 	}
 
 	zwp.dirTree = function(ds, treeElement, contentElement, initialData) {
+		var baseTitle = document.title.split('|').slice(1).join(' | ');
+
 		function requestErrorHandler(xhr, state, error) {
 			console.log('Request failed:', state, error);
 		}
@@ -53,6 +55,7 @@
 				error: requestErrorHandler,
 				success: function (response) {
 					$(contentElement).html(response);
+					document.title = $(contentElement).find('h2').text() + ' | ' + baseTitle;
 
 					if ((pushHistory || pushHistory === undefined) && history.pushState) {
 						console.log('update history to', url);

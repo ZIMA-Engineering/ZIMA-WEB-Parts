@@ -1,5 +1,9 @@
 {% extends "zwp/base.html" %}
 
+{% block title %}
+{{ zwp_dir.label }} | {{ zwp_dir.ds.label }} | {{ block.super }}
+{% endblock %}
+
 {% block zwp_dir %}
 {% include "zwp/dir_content.html" %}
 

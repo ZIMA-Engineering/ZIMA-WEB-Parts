@@ -14,7 +14,7 @@
 				id="dir-tech-spec"
 				src="{{ zwp_dir.tech_spec_url }}"
 				width="920"
-				onload="this.style.height=this.contentDocument.body.scrollHeight + 20 + 'px';">
+				onload="zwp.setFrameHeight(this);">
 			</iframe>
 		</div>
 	{% endif %}
@@ -28,7 +28,7 @@
 					id="dir-parts-index"
 					src="{{ zwp_dir.parts_index_url }}"
 					width="100%"
-					onload="this.style.height=this.contentDocument.body.scrollHeight + 20 + 'px';">
+					onload="zwp.setFrameHeight(this);">
 				</iframe>
 			{% endif %}
 

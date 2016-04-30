@@ -47,6 +47,14 @@
 		return '/' + lang + path.substr(3);
 	};
 
+	zwp.setFrameHeight = function (frame) {
+		if (frame.contentDocument)
+			frame.style.height = frame.contentDocument.body.scrollHeight + 20 + 'px';
+		
+		else
+			frame.style.height = $(window).height() * 0.8 + 'px';
+	};
+
 	zwp.dirTree = function(ds, treeElement, contentElement, initialData) {
 		var baseTitle = document.title.split('|').slice(1).join(' | ');
 

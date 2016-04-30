@@ -232,6 +232,7 @@ class Directory(Item):
 
         self._children = []
         abs_path = self.data_path
+        parts = {}
 
         for f in sorted(os.listdir(abs_path)):
             item_abs_path = os.path.join(abs_path, f)
@@ -241,12 +242,26 @@ class Directory(Item):
                     self._children.append(Directory(self.ds, self.full_path, f))
 
             elif os.path.isfile(item_abs_path):
-                self.add_part(f)
-        
+                p = self.make_part(f)
+
+                if p and p.type == 'prt':
+                    if p.base_name in parts:
+                        if p.version > parts[p.base_name].version:
+                            self._parts.remove(parts[p.base_name])
+                            parts[p.base_name] = p
+
+                        else:
+                            continue
+
+                    else:
+                        parts[p.base_name] = p
+           
+                if p:
+                    self._parts.append(p)
+       
         self._loaded = True
 
-
-    def add_part(self, name):
+    def make_part(self, name):
         p = Part(self, name)
 
         if ZWP_PART_FILTERS and p.type not in ZWP_PART_FILTERS:
@@ -255,7 +270,7 @@ class Directory(Item):
         if self.user and p.type in self.user.part_access[self.ds.name]:
             p.accessible = True
 
-        self._parts.append(p)
+        return p
 
     def metadata_for(self, name):
         return self._parts_meta[name]
@@ -392,6 +407,9 @@ class Part:
     
     @property
     def base_name(self):
+        if self.type == 'prt' and self.version > 0:
+            return '.'.join(self._name.split('.')[0:-2])
+
         return '.'.join(self._name.split('.')[0:-1])
 
     @cached_property
@@ -403,10 +421,22 @@ class Part:
 
         # .prt files are versioned, i.e. they end with a number
         if parts[-1].isdigit() and len(parts) > 1:
+            self.version = int(parts[-1])
             return parts[-2]
 
         else:
+            self.version = 0
             return parts[-1]
+
+    @cached_property
+    def version(self):
+        """
+        Get part version. The version is specified only for PRT files
+        as a number after the extension, e.g. some-part.prt.1, where 1
+        is the version.
+        """
+        self.type  # sets self.version
+        return self.version
 
     @property
     def data_path(self):

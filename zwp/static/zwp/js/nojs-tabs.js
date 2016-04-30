@@ -16,9 +16,13 @@
 		this.init();
 
 		var that = this;
+		var prevOnPopState = window.onpopstate;
 
 		window.onpopstate = function(e) {
 			if (!e.state || !e.state.tabBar || that.opts.tabBar.id !== e.state.tabBar) {
+				if (prevOnPopState)
+					prevOnPopState(e);
+
 				return;
 			}
 			

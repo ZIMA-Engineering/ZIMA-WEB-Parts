@@ -252,11 +252,8 @@ class Directory(Item):
         if ZWP_PART_FILTERS and p.type not in ZWP_PART_FILTERS:
             return
         
-        if self.user:
-            for fmt_rx in self.user.part_access[self.ds.name]:
-                if fmt_rx.search(name):
-                    p.accessible = True
-                    break
+        if self.user and p.type in self.user.part_access[self.ds.name]:
+            p.accessible = True
 
         self._parts.append(p)
 

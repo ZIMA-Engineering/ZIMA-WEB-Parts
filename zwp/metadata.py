@@ -1,7 +1,6 @@
 from django.core.exceptions import PermissionDenied
 import os
 import configparser
-import re
 from .settings import ZWP_METADATA_DIR, ZWP_METADATA_FILE, ZWP_USERS_FILE
 from .signals import part_meta_load
 
@@ -119,7 +118,4 @@ class Users:
         if self.cfg is None or not self.cfg.has_option(username, 'parts'):
             return []
 
-        return map(
-            lambda x: re.compile('\.{}(\.\d+)?$'.format(x)),
-            self.cfg[username]['parts'].split(',')
-        )
+        return self.cfg[username]['parts'].split(',')

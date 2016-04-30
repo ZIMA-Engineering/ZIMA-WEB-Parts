@@ -4,6 +4,7 @@ from django.contrib.staticfiles.storage import staticfiles_storage
 from django.utils.translation import ugettext_lazy as _
 from django.conf import settings
 from django.contrib.auth.models import User
+from django.utils.functional import cached_property
 import hashlib
 import os
 import sys
@@ -246,15 +247,18 @@ class Directory(Item):
 
 
     def add_part(self, name):
-        allowed = False
+        p = Part(self, name)
+
+        if ZWP_PART_FILTERS and p.type not in ZWP_PART_FILTERS:
+            return
         
         if self.user:
             for fmt_rx in self.user.part_access[self.ds.name]:
                 if fmt_rx.search(name):
-                    allowed = True
+                    p.accessible = True
                     break
 
-        self._parts.append(Part(self, name, allowed))
+        self._parts.append(p)
 
     def metadata_for(self, name):
         return self._parts_meta[name]
@@ -364,7 +368,7 @@ for i in ['tech_spec', 'parts_index']:
 
 
 class Part:
-    def __init__(self, d, name, accessible):
+    def __init__(self, d, name, accessible=False):
         self._dir = d
         self._name = name
         self.accessible = accessible
@@ -392,6 +396,20 @@ class Part:
     @property
     def base_name(self):
         return '.'.join(self._name.split('.')[0:-1])
+
+    @cached_property
+    def type(self):
+        """
+        Get part type, which is its extension.
+        """
+        parts = self._name.split('.')
+
+        # .prt files are versioned, i.e. they end with a number
+        if parts[-1].isdigit() and len(parts) > 1:
+            return parts[-2]
+
+        else:
+            return parts[-1]
 
     @property
     def data_path(self):

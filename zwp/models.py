@@ -70,11 +70,11 @@ class Item(object):
     def path(self):
         return self._path
 
-    @property
+    @cached_property
     def data_path(self):
         return os.path.join(self._ds.path, self._path, self._name)
 
-    @property
+    @cached_property
     def full_path(self):
         if self._is_root:
             return self.path
@@ -89,7 +89,7 @@ class Item(object):
     def label(self):
         return self._label if self._label else self._name
 
-    @property
+    @cached_property
     def url(self):
         base = reverse('zwp_dir', args=(self._ds.name, ''))
 
@@ -149,7 +149,7 @@ class Directory(Item):
 
         self._load_metadata()
 
-    @property
+    @cached_property
     def data_path(self):
         if self._is_root:
             return self._ds.path
@@ -161,7 +161,7 @@ class Directory(Item):
     def is_root(self):
         return self._is_root
 
-    @property
+    @cached_property
     def icon(self):
         if self._icon is False or self._icon:
             return self._icon
@@ -169,7 +169,7 @@ class Directory(Item):
         self._icon = self._find_icon(ZWP_DIR_ICON)
         return self._icon
 
-    @property
+    @cached_property
     def text_icon(self):
         if self._text_icon is False or self._text_icon:
             return self._text_icon
@@ -184,7 +184,7 @@ class Directory(Item):
 
         return self._children
     
-    @property
+    @cached_property
     def has_children(self):
         if self._loaded:
             return len(self._children) > 0
@@ -203,7 +203,7 @@ class Directory(Item):
     def columns(self):
         return self._columns
 
-    @property
+    @cached_property
     def part_thumbnails(self):
         if self._part_thumbnails:
             return self._part_thumbnails
@@ -384,7 +384,6 @@ class Part:
         self._dir = d
         self._name = name
         self.accessible = accessible
-        self._metadata = None
 
     def __str__(self):
         return 'Part {}/{}/{}'.format(self.ds.name, self.dir.full_path, self.name)
@@ -405,7 +404,7 @@ class Part:
     def name(self):
         return self._name
     
-    @property
+    @cached_property
     def base_name(self):
         if self.type == 'prt' and self.version > 0:
             return '.'.join(self._name.split('.')[0:-2])
@@ -438,14 +437,14 @@ class Part:
         self.type  # sets self.version
         return self.version
 
-    @property
+    @cached_property
     def data_path(self):
         return os.path.join(
             self.dir.data_path,
             self.name,
         )
 
-    @property
+    @cached_property
     def hash(self):
         print(''.join(os.path.join(
             self.ds.name,
@@ -458,15 +457,11 @@ class Part:
             self.name
         )).encode('utf-8')).hexdigest()
     
-    @property
+    @cached_property
     def size(self):
-        if hasattr(self, '_size'):
-            return self._size
+        return os.stat(self.data_path).st_size
 
-        self._size = os.stat(self.data_path).st_size
-        return self._size
-
-    @property
+    @cached_property
     def thumbnail(self):
         try:
             return self._dir.part_thumbnails[self.base_name]
@@ -481,18 +476,13 @@ class Part:
         except KeyError:
             return None
     
-    @property
+    @cached_property
     def _meta(self):
-        if self._metadata:
-            return self._metadata
-
         try:
-            self._metadata = self._dir.metadata_for(self.base_name)
+            return self._dir.metadata_for(self.base_name)
 
         except KeyError:
-            self._metadata = {}
-
-        return self._metadata
+            return {}
 
 
 class PartModelManager(models.Manager):

@@ -1,0 +1,4 @@
+filetype plugin indent on
+autocmd FileType html setlocal noexpandtab shiftwidth=2 tabstop=2 softtabstop=2
+autocmd FileType javascript setlocal noexpandtab shiftwidth=2 tabstop=2 softtabstop=2
+autocmd BufRead,BufNewFile *.html setlocal noexpandtab shiftwidth=2 tabstop=2 softtabstop=2

@@ -38,7 +38,14 @@
 				);
 			});
 		});
-	}
+	};
+
+	/**
+	 * Translate path from one language to another.
+	 */
+	zwp.translatePath = function (path, lang) {
+		return '/' + lang + path.substr(3);
+	};
 
 	zwp.dirTree = function(ds, treeElement, contentElement, initialData) {
 		var baseTitle = document.title.split('|').slice(1).join(' | ');

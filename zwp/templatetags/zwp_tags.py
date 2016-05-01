@@ -65,11 +65,14 @@ def part_column(part, n):
 
 @register.inclusion_tag('zwp/part_thumbnail.html')
 def part_thumbnail(part):
-    return {
-        'part': part,
-        'width': ZWP_PART_THUMBNAIL_WIDTH
-    }
+    ret = {'part': part}
 
+    if not part.thumbnail:
+        return ret
+
+    ret.update(part.thumbnail_context)
+
+    return ret
 
 @register.simple_tag
 def zwp_static(ds, path):

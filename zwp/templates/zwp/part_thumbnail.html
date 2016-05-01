@@ -1,7 +1,10 @@
 {% load zwp_tags %}
 {% if part.thumbnail %}
-	<img
-		src="{% zwp_static part.ds part.thumbnail %}"
-		alt="{{ part.label }}"
-		width="{{ width }}">
+	<a href="{% zwp_static part.ds part.thumbnail %}">
+		<img
+			src="{{ thumb.url }}"
+			alt="{{ part.label }}"
+			width="{{ thumb.width }}"
+			height="{{ thumb.height }}">
+	</a>
 {% endif %}

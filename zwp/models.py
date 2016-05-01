@@ -469,6 +469,14 @@ class Part:
         except KeyError:
             return None
 
+    @cached_property
+    def thumbnail_context(self):
+        if not self.thumbnail:
+            return {}
+
+        from .thumbnails import get_thumbnail_backend
+        return get_thumbnail_backend()(self)
+
     def get_column(self, n):
         try:
             return self._meta[n]

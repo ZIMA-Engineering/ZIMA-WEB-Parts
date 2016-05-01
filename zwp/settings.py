@@ -8,7 +8,8 @@ ZWP_USERS_FILE = getattr(settings, 'ZWP_METADATA_DIR', 'users.ini')
 ZWP_DIR_ICON = getattr(settings, 'ZWP_DIR_ICON', 'logo.png')
 ZWP_DIR_TEXT_ICON = getattr(settings, 'ZWP_DIR_TEXT_ICON', 'logo-text.png')
 ZWP_PART_THUMBNAIL_DIR = getattr(settings, 'ZWP_PART_THUMBNAIL_DIR', ZWP_METADATA_DIR + '/thumbnails')
-ZWP_PART_THUMBNAIL_WIDTH = getattr(settings, 'ZWP_PART_THUMBNAIL_WIDTH', 128)
+ZWP_PART_THUMBNAIL_SIZE = getattr(settings, 'ZWP_PART_THUMBNAIL_SIZE', (128, 128))
+ZWP_THUMBNAIL_BACKEND = getattr(settings, 'ZWP_THUMBNAIL_BACKEND', 'zwp.thumbnails.direct')
 
 ZWP_DOWNLOAD_ROOT = getattr(
     settings,

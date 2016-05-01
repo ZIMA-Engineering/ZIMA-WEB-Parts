@@ -1,6 +1,9 @@
 {% load zwp_tags %}
 {% if part.thumbnail %}
-	<a href="{% zwp_static part.ds part.thumbnail %}">
+	<a
+		href="{% zwp_static part.ds part.thumbnail %}"
+		data-lightbox="parts"
+		data-title="{{ part.label }}">
 		<img
 			src="{{ thumb.url }}"
 			alt="{{ part.label }}"

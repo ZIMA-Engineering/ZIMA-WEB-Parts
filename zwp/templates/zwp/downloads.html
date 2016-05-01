@@ -33,7 +33,7 @@
 							{{ form.instance.part_model.name }}
 						</a>
 					</td>
-					<td>{% part_thumbnail form.part %}</td>
+					<td>{% part_thumbnail form.instance.part_model.part %}</td>
 					<td>{{ form.instance.part_model.part.size|filesizeformat }}</td>
 					<td>
 						{% for hidden in form.hidden_fields %}

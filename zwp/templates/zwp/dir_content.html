@@ -1,6 +1,8 @@
 {% load i18n zwp_tags %}
 
-<h2>{{ zwp_dir.label }}</h2>
+{% if show_label %}
+	<h2>{{ zwp_dir.label }}</h2>
+{% endif %}
 
 <div id="tabbar">
 	{# Placeholder for tab menu #}

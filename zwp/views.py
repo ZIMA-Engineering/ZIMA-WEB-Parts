@@ -10,6 +10,7 @@ from django.contrib import messages
 from .models import Directory, DownloadBatch, PartDownload
 from .forms import PartDownloadFormSet
 from .utils import format_children, get_or_create_download_batch, get_or_none
+from .settings import ZWP_DIR_SHOW_LABEL
 
 
 class DirectoryContentView(View):
@@ -35,6 +36,7 @@ class DirectoryContentView(View):
                 return render(request, 'zwp/dir_content.html', {
                     'zwp_dir': d,
                     'formset': formset,
+                    'show_label': ZWP_DIR_SHOW_LABEL,
                 })
 
             return HttpResponseForbidden()
@@ -42,6 +44,7 @@ class DirectoryContentView(View):
         return render(request, 'zwp/dir.html', {
             'zwp_dir': d,
             'formset': formset,
+            'show_label': ZWP_DIR_SHOW_LABEL,
         })
 
     def post(self, request, d):
@@ -77,6 +80,7 @@ class DirectoryContentView(View):
         return render(request, 'zwp/dir.html', {
             'zwp_dir': d,
             'formset': formset,
+            'show_label': ZWP_DIR_SHOW_LABEL,
         })
 
     def _formset(self, request, batch, d):

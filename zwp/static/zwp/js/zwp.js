@@ -62,7 +62,7 @@
 			console.log('Request failed:', state, error);
 		}
 
-		function loadDir(id, url, pushHistory, cb) {
+		function loadDir(id, url, title, pushHistory, cb) {
 			console.log('load dir', url);
 			$.ajax({
 				url: url + '?fetch=content',
@@ -70,13 +70,14 @@
 				error: requestErrorHandler,
 				success: function (response) {
 					$(contentElement).html(response);
-					document.title = $(contentElement).find('h2').text() + ' | ' + baseTitle;
+					document.title = title + ' | ' + baseTitle;
 
 					if ((pushHistory || pushHistory === undefined) && history.pushState) {
 						console.log('update history to', url);
 						history.pushState({
 							ds: ds,
-							id: id
+							id: id,
+							title: title,
 						}, null, url);
 					}
 
@@ -97,7 +98,7 @@
 				return;
 			}
 
-			loadDir(e.state.id, window.location.pathname, false, function() {
+			loadDir(e.state.id, window.location.pathname, e.state.title, false, function() {
 				var tree = $(treeElement).jstree(true);
 				tree.deselect_all(true);
 				tree.select_node(e.state.id, true);
@@ -113,7 +114,7 @@
 				if (data.action != 'select_node')
 					return;
 				
-				loadDir(data.node.id, data.node.original.url);
+				loadDir(data.node.id, data.node.original.url, data.node.text);
 
 			}).jstree({
 				'core': {

@@ -80,12 +80,15 @@
 							</tr>
 						{% endif %}
 						<tr
+							class="
 							{% ifchanged form.part.base_name %}
-								class="{% cycle '' 'striped' as tr_class %}"
+								{% cycle '' 'striped' as tr_class %}
 
 							{% else %}
-								class="{{ tr_class }}"
+								{{ tr_class }}
 							{% endifchanged %}
+							{% if form.dl %}success{% endif %}
+							"
 							>
 							<td>
 								{% for hidden in form.hidden_fields %}

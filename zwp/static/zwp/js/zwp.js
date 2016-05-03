@@ -37,6 +37,17 @@
 					})
 				);
 			});
+
+			$(table).find('td input[type="checkbox"]').each(function () {
+				if (this.checked)
+					$(this).parents('tr').addClass('success');
+
+				else
+					$(this).parents('tr').removeClass('success');
+
+			}).change(function () {
+				$(this).parents('tr').toggleClass('success');
+			});
 		});
 	};
 

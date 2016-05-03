@@ -4,6 +4,7 @@ from django.forms import BaseFormSet, formset_factory
 from django.conf import settings
 from django.utils.translation import ugettext_lazy as _
 from django.utils.translation import ugettext as __
+from django.utils.functional import cached_property
 from django.db import IntegrityError, transaction
 from .models import Directory, PartModel, PartDownload
 
@@ -171,6 +172,16 @@ class BasePartDownloadFormSet(BaseFormSet):
 
                 elif ret == -1:
                     self.unmarked += 1
+
+    @cached_property
+    def marked_count(self):
+        cnt = 0
+
+        for form in self.forms:
+            if form.dl:
+                cnt += 1
+
+        return cnt
 
 
 PartDownloadFormSet = formset_factory(

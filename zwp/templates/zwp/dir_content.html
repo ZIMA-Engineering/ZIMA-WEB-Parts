@@ -38,9 +38,29 @@
 				{{ formset.management_form }}
 				{% csrf_token %}
 				<table class="table table-hover">
+					<tr>
+						<td colspan="3" class="text-right">
+							<span class="selected-download {% if formset.marked_count > 0 %}enabled{% endif %}">
+								{% if formset.marked_count == 0 %}
+									{% trans "No parts selected" %}
+
+								{% else %}
+									{% blocktrans trimmed count cnt=formset.marked_count %}
+										{{ cnt }} part selected
+									{% plural %}
+										{{ cnt }} parts selected
+									{% endblocktrans %}
+								{% endif %}
+							</span>
+							<input
+								type="submit"
+								value="{% trans "Add for download" %}"
+								class="btn btn-default btn-download {% if formset.marked_count > 0 %}enabled{% endif %}">
+						</td>
+					</tr>
 					<tr class="striped">
 						<th class="checkall"></th>
-						<th>{% trans "Part" %}</th>
+						<th class="part">{% trans "Part" %}</th>
 						<th>{% trans "Thumbnail" %}</th>
 
 						{% for c in zwp_dir.columns %}
@@ -84,12 +104,6 @@
 							{% endfor %}
 						</tr>
 					{% endfor %}
-						<tr>
-							<th class="checkall"></th>
-							<td>
-								<input type="submit" value="{% trans "Mark for download" %}" class="btn btn-default">
-							</td>
-						</tr>
 				</table>
 			</form>
 		</div>

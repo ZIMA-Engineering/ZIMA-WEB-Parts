@@ -67,7 +67,7 @@ class Command(BaseCommand):
 
         if os.fork() > 0:
             sys.exit(0)
-        
+
         #sys.stdin.close()
         #sys.stdout.close()
         #sys.stderr.close()

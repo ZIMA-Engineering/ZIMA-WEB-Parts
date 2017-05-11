@@ -9,7 +9,7 @@ from .signals import part_meta_load
 class Metadata:
     def __init__(self, d):
         from .utils import short_lang
-        
+
         self._dir = d
         self._path = os.path.join(d.data_path, ZWP_METADATA_DIR, ZWP_METADATA_FILE)
         self._lang = short_lang()
@@ -26,7 +26,7 @@ class Metadata:
     @property
     def label(self):
         label_opt = '{}/label'.format(self._lang)
-        
+
         if self.cfg.has_option('params', label_opt):
             return self.cfg['params'][label_opt].replace('"', '')
 
@@ -39,14 +39,14 @@ class Metadata:
         # Load options from all languages
         for raw_opt in self.cfg.options('params'):
             parts = raw_opt.split('/')
-            
+
             if len(parts) > 1:
                 lang, opt = parts
 
             else:
                 lang = None
                 opt = parts[0]
-            
+
             if not lang in columns:
                 columns[lang] = []
 
@@ -76,7 +76,7 @@ class Metadata:
             part = {}
 
             for _, data in part_meta_load.send(sender=self.__class__, name=sec, cfg=self.cfg):
-                part.update(data)    
+                part.update(data)
 
             for opt in self.cfg.options(sec):
                 if not opt.isdigit():
@@ -93,7 +93,7 @@ class Users:
     def __init__(self, ds):
         self._path = os.path.join(ds.path, ZWP_METADATA_DIR, ZWP_USERS_FILE)
         self.parse()
-    
+
     def parse(self):
         if os.path.exists(self._path):
             self.cfg = configparser.ConfigParser()
@@ -101,7 +101,7 @@ class Users:
 
         else:
             self.cfg = None
-    
+
     def authenticate(self, username, password):
         if self.cfg is None or not self.cfg.has_section(username):
             return False

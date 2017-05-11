@@ -40,7 +40,7 @@ def format_dir(d, path = []):
     if path and d.name == path[0]:
         if len(path) == 1:
             ret['state']['selected'] = True
-   
+
         target = path[1:]
 
         if target:

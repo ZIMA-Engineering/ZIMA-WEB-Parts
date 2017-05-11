@@ -65,7 +65,7 @@ class DirectoryContentView(View):
                     request,
                     _('Unmarked {} files for download.').format(formset.unmarked)
                 )
-            
+
             else:
                 messages.info(
                     request,

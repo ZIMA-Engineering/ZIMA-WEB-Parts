@@ -84,7 +84,7 @@ class Item(object):
     @property
     def name(self):
         return self._name
-    
+
     @property
     def label(self):
         return self._label if self._label else self._name
@@ -184,7 +184,7 @@ class Directory(Item):
             self.load()
 
         return self._children
-    
+
     @cached_property
     def has_children(self):
         if self._loaded:
@@ -222,7 +222,7 @@ class Directory(Item):
                 continue
 
             self._part_thumbnails['.'.join(parts[0:-1])] = os.path.join(
-                self.full_path, ZWP_PART_THUMBNAIL_DIR, f        
+                self.full_path, ZWP_PART_THUMBNAIL_DIR, f
             )
 
         return self._part_thumbnails
@@ -241,7 +241,7 @@ class Directory(Item):
             if os.path.isdir(item_abs_path):
                 if f == ZWP_METADATA_DIR:
                     continue
-                
+
                 d = Directory(self.ds, self.full_path, f, user=self.user)
 
                 if d.accessible:
@@ -261,10 +261,10 @@ class Directory(Item):
 
                     else:
                         parts[p.base_name] = p
-           
+
                 if p:
                     self._parts.append(p)
-       
+
         self._loaded = True
 
     def make_part(self, name):
@@ -272,7 +272,7 @@ class Directory(Item):
 
         if ZWP_PART_FILTERS and p.type not in ZWP_PART_FILTERS:
             return
-        
+
         if self.user and p.type in self.user.part_access[self.ds.name]:
             p.accessible = True
 
@@ -299,7 +299,7 @@ class Directory(Item):
 
         if not meta.exists() or not meta.parse():
             return
-        
+
         self._label = meta.label
         self._columns = meta.columns
         self._parts_meta = meta.parts_data
@@ -348,10 +348,10 @@ class Directory(Item):
             'parts_index': re.compile(r'^parts-index([_a-z{2}]*)\.html$')
         }
         path = os.path.join(self.data_path, ZWP_METADATA_DIR)
-        
+
         if not os.path.exists(path):
             return False
-        
+
         from .utils import short_lang
 
         current_lang = short_lang()
@@ -364,7 +364,7 @@ class Directory(Item):
 
                 if not match:
                     continue
-                
+
                 lang = match.group(1)[1:]
 
                 if lang == current_lang:
@@ -406,7 +406,7 @@ class Part:
 
     def __str__(self):
         return 'Part {}/{}/{}'.format(self.ds.name, self.dir.full_path, self.name)
-   
+
     @property
     def ds(self):
         return self._dir.ds
@@ -422,7 +422,7 @@ class Part:
     @property
     def name(self):
         return self._name
-    
+
     @cached_property
     def base_name(self):
         if self.type == 'prt' and self.version > 0:
@@ -475,7 +475,7 @@ class Part:
             self.dir.full_path,
             self.name
         )).encode('utf-8')).hexdigest()
-    
+
     @cached_property
     def size(self):
         return os.stat(self.data_path).st_size
@@ -502,7 +502,7 @@ class Part:
 
         except KeyError:
             return None
-    
+
     @cached_property
     def _meta(self):
         try:
@@ -536,12 +536,12 @@ class PartModel(models.Model):
 
         if not d:
             return None
-        
+
         for p in d.parts:
             if p.name == self.name:
                 self._part = p
                 break
-        
+
         return self._part
 
     @part.setter
@@ -580,14 +580,14 @@ class DownloadBatch(models.Model):
     updated_at = models.DateTimeField(_('updated at'), null=True)
     state = models.IntegerField(_('state'), default=OPEN)
     zip_file = models.CharField(_('zip file'), max_length=255, null=True)
-   
+
     def __str__(self):
         return 'DownloadBatch #{}'.format(self.pk)
 
     def save(self, *args, **kwargs):
         if self.pk:
             return super(DownloadBatch, self).save(*args, **kwargs)
- 
+
         for _ in range(5):
             try:
                 self.key = self._generate_key(40)

@@ -1,7 +1,7 @@
 {% load i18n zwp_tags %}
 <h2>{% dir_label zwp_dir %}</h2>
 
-<p>	
+<p>
 {% if zwp_parent %}
 <a href="{{ zwp_parent.url }}">{% trans "back to" %} {% dir_label zwp_parent %}</a>
 {% endif %}

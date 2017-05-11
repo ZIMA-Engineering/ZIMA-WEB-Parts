@@ -69,7 +69,7 @@ class PartDownloadForm(forms.ModelForm):
     class Meta:
         model = PartDownload
         fields = ()
-    
+
     def __init__(self, data=None, initial={}, user=None, *args, **kwargs):
         part_initial = {}
 
@@ -77,7 +77,7 @@ class PartDownloadForm(forms.ModelForm):
         self.download_batch = initial['batch']
         self.part = initial['part']
         part_initial = {
-            'ds_name': self.part.ds.name,    
+            'ds_name': self.part.ds.name,
             'dir_path': self.part.dir.full_path,
             'name': self.part.name,
         }
@@ -102,7 +102,7 @@ class PartDownloadForm(forms.ModelForm):
     def clean(self):
         data = super(PartDownloadForm, self).clean()
         part_data = {}
-        
+
         for f in ['ds_name', 'dir_path', 'name']:
             if data and f in data:
                 part_data[f] = data[f]
@@ -116,9 +116,9 @@ class PartDownloadForm(forms.ModelForm):
             )
 
         return data
-    
+
     def is_valid(self):
-        return self.part_form.is_valid() and super(PartDownloadForm, self).is_valid() 
+        return self.part_form.is_valid() and super(PartDownloadForm, self).is_valid()
 
     def save(self):
         if not self.cleaned_data['download']:

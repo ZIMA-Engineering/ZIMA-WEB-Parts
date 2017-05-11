@@ -8,7 +8,7 @@ from zwp.settings import ZWP_DOWNLOAD_ROOT
 
 class Command(BaseCommand):
     help = 'Delete ZIP files of expired download batches'
-    
+
     def add_arguments(self, parser):
         parser.add_argument('seconds', type=int)
 

@@ -293,7 +293,6 @@ class Directory(Item):
             return
 
         self.accessible = acl.is_accessible(self.user)
-        print('accessible? {} {}'.format(self.name, self.accessible))
 
     def _load_metadata(self):
         meta = Metadata(self)

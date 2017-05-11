@@ -12,7 +12,7 @@ import subprocess
 import re
 import random
 import string
-from .metadata import Users, Metadata
+from .metadata import Users, Metadata, Acl
 from .settings import *
 
 
@@ -147,6 +147,7 @@ class Directory(Item):
         self._parts_meta = {}
         self._part_thumbnails = None
 
+        self._load_acl()
         self._load_metadata()
 
     @cached_property
@@ -238,8 +239,13 @@ class Directory(Item):
             item_abs_path = os.path.join(abs_path, f)
 
             if os.path.isdir(item_abs_path):
-                if f != ZWP_METADATA_DIR:
-                    self._children.append(Directory(self.ds, self.full_path, f))
+                if f == ZWP_METADATA_DIR:
+                    continue
+                
+                d = Directory(self.ds, self.full_path, f, user=self.user)
+
+                if d.accessible:
+                    self._children.append(d)
 
             elif os.path.isfile(item_abs_path):
                 p = self.make_part(f)
@@ -274,6 +280,20 @@ class Directory(Item):
 
     def metadata_for(self, name):
         return self._parts_meta[name]
+
+    def _load_acl(self):
+        acl = Acl(self)
+
+        if not acl.exists():
+            self.accessible = True
+            return
+
+        elif not acl.parse():
+            self.accessible = False
+            return
+
+        self.accessible = acl.is_accessible(self.user)
+        print('accessible? {} {}'.format(self.name, self.accessible))
 
     def _load_metadata(self):
         meta = Metadata(self)

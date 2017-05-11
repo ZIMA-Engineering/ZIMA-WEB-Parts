@@ -1,7 +1,7 @@
 from django.core.exceptions import PermissionDenied
 import os
 import configparser
-from .settings import ZWP_METADATA_DIR, ZWP_METADATA_FILE, ZWP_USERS_FILE
+from .settings import ZWP_METADATA_DIR, ZWP_METADATA_FILE, ZWP_USERS_FILE, ZWP_ACL_FILE
 from .signals import part_meta_load
 
 
@@ -119,3 +119,31 @@ class Users:
             return []
 
         return self.cfg[username]['parts'].split(',')
+
+
+class Acl:
+    def __init__(self, d):
+        self._path = os.path.join(d.data_path, ZWP_METADATA_DIR, ZWP_ACL_FILE)
+
+    def exists(self):
+        return os.path.exists(self._path)
+
+    def parse(self):
+        self.cfg = configparser.ConfigParser()
+        self.cfg.read(self._path)
+
+        return True
+
+    def is_accessible(self, user):
+        if self.cfg.has_section('allow'):
+            if self.cfg.has_option('allow', 'users'):
+                if user is None:
+                    return False
+
+                elif user.username in self.cfg['allow']['users'].split(','):
+                    return True
+
+                else:
+                    return False
+
+        return True

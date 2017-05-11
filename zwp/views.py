@@ -17,7 +17,7 @@ class DirectoryContentView(View):
     def dispatch(self, request, ds, path):
         d = Directory.from_path(ds, path, load=True, user=request.user)
 
-        if d is False:
+        if d is False or not d.accessible:
             return HttpResponseForbidden()
 
         return super(DirectoryContentView, self).dispatch(request, d)

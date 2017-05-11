@@ -29,7 +29,7 @@ def directory_tree(context):
 
         print("parent_path={}, parent_name={}".format(parent_path, parent_name))
 
-        parent = Directory(context['zwp_dir'].ds, parent_path, parent_name, root=root)
+        parent = Directory(context['zwp_dir'].ds, parent_path, parent_name, root=root, user=context['request'].user)
 
     try:
         context.update({
@@ -50,7 +50,7 @@ def zwp_json_tree(context):
     d = context['zwp_dir']
     path = d.full_path.split('/')
 
-    root = Directory(d.ds, '', os.path.basename(d.ds.path), root=True)
+    root = Directory(d.ds, '', os.path.basename(d.ds.path), root=True, user=context['request'].user)
 
     for child in root.children:
         ret.append(format_dir(child, path))

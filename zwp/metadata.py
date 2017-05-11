@@ -1,6 +1,7 @@
 from django.core.exceptions import PermissionDenied
 import os
 import configparser
+import pam
 from .settings import ZWP_METADATA_DIR, ZWP_METADATA_FILE, ZWP_USERS_FILE, ZWP_ACL_FILE
 from .signals import part_meta_load
 
@@ -105,9 +106,17 @@ class Users:
         if self.cfg is None or not self.cfg.has_section(username):
             return False
 
-        if self.cfg.has_option(username, 'password') and \
-            self.cfg[username]['password'] == password:
-            return True
+        source = 'internal'
+
+        if self.cfg.has_option(username, 'source'):
+            source = self.cfg[username]['source']
+
+        if source == 'internal':
+            return self.cfg[username]['password'] == password
+
+        elif source == 'pam':
+            p = pam.pam()
+            return p.authenticate(username, password)
 
         raise PermissionDenied()
 

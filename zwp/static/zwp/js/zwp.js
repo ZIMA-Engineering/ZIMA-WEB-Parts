@@ -1,6 +1,6 @@
 (function() {
 	window.zwp = {};
-	
+
 	zwp.setupContentTabs = function () {
 		nojsTabs({
 			tabs: document.getElementById('tabs'),
@@ -61,7 +61,7 @@
 	zwp.setFrameHeight = function (frame) {
 		if (frame.contentDocument)
 			frame.style.height = frame.contentDocument.body.scrollHeight + 20 + 'px';
-		
+
 		else
 			frame.style.height = $(window).height() * 0.8 + 'px';
 	};
@@ -75,12 +75,15 @@
 
 		function loadDir(id, url, title, pushHistory, cb) {
 			console.log('load dir', url);
+
+			$(contentElement).fadeOut();
+
 			$.ajax({
 				url: url + '?fetch=content',
 				dataType: 'html',
 				error: requestErrorHandler,
 				success: function (response) {
-					$(contentElement).html(response);
+					$(contentElement).html(response).fadeIn();
 					document.title = title + ' | ' + baseTitle;
 
 					if ((pushHistory || pushHistory === undefined) && history.pushState) {
@@ -94,7 +97,7 @@
 
 					if (cb !== undefined)
 						cb();
-					
+
 					zwp.setupContentTabs();
 					zwp.setupPartCheckBoxes(contentElement);
 				}
@@ -103,7 +106,7 @@
 
 		window.onpopstate = function(e) {
 			console.log('onpopstate!', e.state);
-			
+
 			if (e.state.ds != ds) {
 				console.log('ds does not match, ignore', e.state, ds);
 				return;
@@ -124,7 +127,7 @@
 
 				if (data.action != 'select_node')
 					return;
-				
+
 				loadDir(data.node.id, data.node.original.url, data.node.text);
 
 			}).jstree({

@@ -273,7 +273,7 @@ class Directory(Item):
         if ZWP_PART_FILTERS and p.type not in ZWP_PART_FILTERS:
             return
 
-        if self.user and p.type in self.user.part_access[self.ds.name]:
+        if self.user and self.user.part_acl.can_access(self.ds, p):
             p.accessible = True
 
         return p
@@ -517,6 +517,18 @@ class Part:
 
         except KeyError:
             return {}
+
+
+class PartAcl:
+    def __init__(self):
+        self.rules = {}
+
+    def add(self, ds, allowed):
+        self.rules[ds.name] = allowed
+
+    def can_access(self, ds, part):
+        allowed = self.rules[ds.name]
+        return part.type in allowed or '@all' in allowed
 
 
 class PartModelManager(models.Manager):

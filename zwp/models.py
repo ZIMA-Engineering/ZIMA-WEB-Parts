@@ -250,7 +250,7 @@ class Directory(Item):
             elif os.path.isfile(item_abs_path):
                 p = self.make_part(f.encode('utf8', 'replace').decode('utf-8'))
 
-                if p and p.type == 'prt':
+                if p and p.type in ZWP_VERSIONED_PARTS:
                     if p.base_name in parts:
                         if p.version > parts[p.base_name].version:
                             self._parts.remove(parts[p.base_name])
@@ -425,7 +425,7 @@ class Part:
 
     @cached_property
     def base_name(self):
-        if self.type == 'prt' and self.version > 0:
+        if self.type in ZWP_VERSIONED_PARTS and self.version > 0:
             return '.'.join(self._name.split('.')[0:-2])
 
         return '.'.join(self._name.split('.')[0:-1])

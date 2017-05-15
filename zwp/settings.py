@@ -26,3 +26,4 @@ ZWP_DOWNLOAD_URL = getattr(
 )
 
 ZWP_PART_FILTERS = getattr(settings, 'ZWP_PART_FILTERS', None)
+ZWP_VERSIONED_PARTS = getattr(settings, 'ZWP_VERSIONED_PARTS', ['asm', 'drw', 'prt'])

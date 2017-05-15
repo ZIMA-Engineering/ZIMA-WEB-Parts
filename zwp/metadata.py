@@ -63,7 +63,7 @@ class Metadata:
         if len(columns) == 0:
             return []
 
-        return columns[ columns.keys()[0] ]
+        return columns[ list(columns.keys())[0] ]
 
     @property
     def parts_data(self):

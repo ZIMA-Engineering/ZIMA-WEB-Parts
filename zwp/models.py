@@ -248,7 +248,7 @@ class Directory(Item):
                     self._children.append(d)
 
             elif os.path.isfile(item_abs_path):
-                p = self.make_part(f)
+                p = self.make_part(f.encode('utf8', 'replace').decode('utf-8'))
 
                 if p and p.type == 'prt':
                     if p.base_name in parts:

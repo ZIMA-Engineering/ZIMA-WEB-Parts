@@ -251,16 +251,16 @@ class Directory(Item):
                 p = self.make_part(f.encode('utf8', 'replace').decode('utf-8'))
 
                 if p and p.type in ZWP_VERSIONED_PARTS:
-                    if p.base_name in parts:
-                        if p.version > parts[p.base_name].version:
-                            self._parts.remove(parts[p.base_name])
-                            parts[p.base_name] = p
+                    if p.version_name in parts:
+                        if p.version > parts[p.version_name].version:
+                            self._parts.remove(parts[p.version_name])
+                            parts[p.version_name] = p
 
                         else:
                             continue
 
                     else:
-                        parts[p.base_name] = p
+                        parts[p.version_name] = p
 
                 if p:
                     self._parts.append(p)
@@ -429,6 +429,13 @@ class Part:
             return '.'.join(self._name.split('.')[0:-2])
 
         return '.'.join(self._name.split('.')[0:-1])
+
+    @cached_property
+    def version_name(self):
+        if self.type in ZWP_VERSIONED_PARTS:
+            return '.'.join(self._name.split('.')[0:-1])
+
+        return self.base_name
 
     @cached_property
     def type(self):

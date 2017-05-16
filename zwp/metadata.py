@@ -38,14 +38,7 @@ class Metadata:
 
         # Load options from all languages
         for raw_opt in self.cfg.options('params'):
-            parts = raw_opt.split('/')
-
-            if len(parts) > 1:
-                lang, opt = parts
-
-            else:
-                lang = None
-                opt = parts[0]
+            lang, opt = self._parse_opt(raw_opt)
 
             if not lang in columns:
                 columns[lang] = []
@@ -78,15 +71,43 @@ class Metadata:
             for _, data in part_meta_load.send(sender=self.__class__, name=sec, cfg=self.cfg):
                 part.update(data)
 
-            for opt in self.cfg.options(sec):
+            for raw_opt in self.cfg.options(sec):
+                lang, opt = self._parse_opt(raw_opt)
+
+                if lang not in part:
+                    part[lang] = {}
+
                 if not opt.isdigit():
                     continue
 
-                part[int(opt)] = self.cfg[sec][opt]
+                part[lang][int(opt)] = self.cfg[sec][raw_opt]
 
-            ret[sec] = part
+            # Select language
+            for lang in part:
+                if lang == self._lang:
+                    ret[sec] = part[lang]
+
+            if sec not in ret and len(part) > 0:
+                ret[sec] = part[ list(part.keys())[0] ]
 
         return ret
+
+    def _parse_opt(self, raw_opt):
+        parts = []
+
+        if '/' in raw_opt:
+            parts = raw_opt.split('/')
+
+        elif '\\' in raw_opt:
+            parts = raw_opt.split('\\')
+
+        else:
+            parts = [raw_opt]
+
+        if len(parts) > 1:
+            return parts
+
+        return [None, parts[0]]
 
 
 class Users:

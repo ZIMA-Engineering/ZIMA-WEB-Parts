@@ -532,11 +532,6 @@ class Part:
 
     @cached_property
     def hash(self):
-        print(''.join(os.path.join(
-            self.ds.name,
-            self.dir.full_path,
-            self.name
-        )))
         return hashlib.sha256(''.join(os.path.join(
             self.ds.name,
             self.dir.full_path,

@@ -15,7 +15,7 @@ from .settings import ZWP_DIR_SHOW_LABEL
 
 class DirectoryContentView(View):
     def dispatch(self, request, ds, path):
-        d = Directory.from_path(ds, path, load=True, user=request.user)
+        d = Directory.from_path(ds, path, user=request.user, load=True)
 
         if d is False or not d.accessible:
             return HttpResponseForbidden()

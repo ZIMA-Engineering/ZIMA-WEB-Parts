@@ -5,6 +5,8 @@ from django.utils.translation import ugettext_lazy as _
 from django.conf import settings
 from django.contrib.auth.models import User
 from django.utils.functional import cached_property
+from django.core.cache import cache
+from django.core.cache.utils import make_template_fragment_key
 import hashlib
 import os
 import sys
@@ -106,7 +108,57 @@ class Item(object):
 
 class Directory(Item):
     @staticmethod
-    def from_path(ds_name, path, load=False, user=None):
+    def get(ds, path, name, user=None, **kwargs):
+        """
+        This method is used instead of the constructor, as it does not create a new object
+        when it's already in cache.
+        """
+        full_path = os.path.join(path, name)
+
+        key = make_template_fragment_key(
+            'zwp_dir_instance',
+            [ds.name, full_path, user and user.username]
+        )
+        v = cache.get(key)
+
+        if v:
+            print('cache hit for ds={}; dir={}; user={}'.format(ds.name, full_path, user))
+            return v
+
+        d = Directory(ds, path, name=name, user=user, **kwargs)
+        cache.set(key, d, 60)
+        print('cache miss for ds={}; dir={}; user={}'.format(ds.name, full_path, user))
+        return d
+
+    @staticmethod
+    def from_path(ds_name, path, user=None, load=False, **kwargs):
+        """
+        Cached version of ``from_path``.
+        """
+        key = make_template_fragment_key(
+            'zwp_dir_instance',
+            [ds_name, path, user and user.username]
+        )
+        v = cache.get(key)
+
+        if v:
+            print('cache hit for ds={}; dir={}; user={}'.format(ds_name, path, user))
+
+            if load:
+                v.load()
+
+            return v
+
+        d = Directory._from_path(ds_name, path, user=user, load=load, **kwargs)
+        cache.set(key, d, 60)
+        print('cache miss for ds={}; dir={}; user={}'.format(ds_name, path, user))
+        return d
+
+    @staticmethod
+    def _from_path(ds_name, path, load=False, user=None):
+        """
+        This method does not check the cache and always creates a new instance.
+        """
         ds = None
 
         for opts in settings.ZWP_DATA_SOURCES:
@@ -250,7 +302,7 @@ class Directory(Item):
                 if f == ZWP_METADATA_DIR:
                     continue
 
-                d = Directory(self.ds, self.full_path, f, user=self.user)
+                d = Directory.get(self.ds, self.full_path, f, user=self.user)
 
                 if d.accessible:
                     self._children.append(d)

@@ -30,8 +30,8 @@ class PartModelForm(forms.ModelForm):
         self.dir = Directory.from_path(
             data['ds_name'],
             data['dir_path'],
-            load=True,
-            user=self.user
+            user=self.user,
+            load=True
         )
 
         if not self.dir:

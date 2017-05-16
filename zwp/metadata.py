@@ -18,7 +18,7 @@ class Metadata:
         return os.path.exists(self._path)
 
     def parse(self):
-        self.cfg = configparser.ConfigParser()
+        self.cfg = configparser.ConfigParser(interpolation=None)
         self.cfg.read(self._path)
 
         return self.cfg.has_section('params')

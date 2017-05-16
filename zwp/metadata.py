@@ -34,29 +34,7 @@ class Metadata:
 
     @property
     def columns(self):
-        columns = {}  # lang: [columns]
-
-        # Load options from all languages
-        for raw_opt in self.cfg.options('params'):
-            lang, opt = self._parse_opt(raw_opt)
-
-            if not lang in columns:
-                columns[lang] = []
-
-            if not opt.isdigit():
-                continue
-
-            columns[lang].append(self.cfg['params'][raw_opt].replace('"', ''))
-
-        # Select language
-        for lang in columns:
-            if lang == self._lang:
-                return columns[lang]
-
-        if len(columns) == 0:
-            return []
-
-        return columns[ list(columns.keys())[0] ]
+        return list(map(lambda x: x[1], sorted(self._parse_columns().items())))
 
     @property
     def parts_data(self):
@@ -91,6 +69,31 @@ class Metadata:
                 ret[sec] = part[ list(part.keys())[0] ]
 
         return ret
+
+    def _parse_columns(self):
+        columns = {}  # lang: [columns]
+
+        # Load options from all languages
+        for raw_opt in self.cfg.options('params'):
+            lang, opt = self._parse_opt(raw_opt)
+
+            if not lang in columns:
+                columns[lang] = {}
+
+            if not opt.isdigit():
+                continue
+
+            columns[lang][int(opt)] = self.cfg['params'][raw_opt].replace('"', '')
+
+        # Select language
+        for lang in columns:
+            if lang == self._lang:
+                return columns[lang]
+
+        if len(columns) == 0:
+            return []
+
+        return columns[ list(columns.keys())[0] ]
 
     def _parse_opt(self, raw_opt):
         parts = []

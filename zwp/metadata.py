@@ -39,10 +39,10 @@ class Metadata:
             if self.cfg.has_option('include', 'data'):
                 self._data_includes = list(map(tmp, self.cfg['include']['data'].split(',')))
 
-            if self.cfg.has_option('include', 'thumbs'):
+            if self.cfg.has_option('include', 'thumbnails'):
                 self.thumbnail_paths += list(map(
                     lambda x: os.path.join(self._resolve_path(x.strip()), ZWP_PART_THUMBNAIL_DIR),
-                    self.cfg['include']['thumbs'].split(',')
+                    self.cfg['include']['thumbnails'].split(',')
                 ))
 
         return self.cfg.has_section('params') or self._data_includes

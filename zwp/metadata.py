@@ -2,7 +2,8 @@ from django.core.exceptions import PermissionDenied
 import os
 import configparser
 import pam
-from .settings import ZWP_METADATA_DIR, ZWP_METADATA_FILE, ZWP_USERS_FILE, ZWP_ACL_FILE
+from .settings import ZWP_METADATA_DIR, ZWP_METADATA_FILE, ZWP_USERS_FILE, ZWP_ACL_FILE, \
+                      ZWP_PART_THUMBNAIL_DIR
 from .signals import part_meta_load
 
 
@@ -14,6 +15,7 @@ class Metadata:
         self._path = os.path.join(d.data_path, ZWP_METADATA_DIR, ZWP_METADATA_FILE)
         self._lang = short_lang()
         self._data_includes = []
+        self.thumbnail_paths = [os.path.join(d.data_path, ZWP_PART_THUMBNAIL_DIR)]
 
     def exists(self):
         return os.path.exists(self._path)
@@ -37,7 +39,11 @@ class Metadata:
             if self.cfg.has_option('include', 'data'):
                 self._data_includes = list(map(tmp, self.cfg['include']['data'].split(',')))
 
-            # TODO: if self.cfg.has_option('include', 'thumbs'):
+            if self.cfg.has_option('include', 'thumbs'):
+                self.thumbnail_paths += list(map(
+                    lambda x: os.path.join(self._resolve_path(x.strip()), ZWP_PART_THUMBNAIL_DIR),
+                    self.cfg['include']['thumbs'].split(',')
+                ))
 
         return self.cfg.has_section('params') or self._data_includes
 

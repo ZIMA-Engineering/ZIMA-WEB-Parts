@@ -210,20 +210,28 @@ class Directory(Item):
             return self._part_thumbnails
 
         self._part_thumbnails = {}
-        thumb_path = os.path.join(self.data_path, ZWP_PART_THUMBNAIL_DIR)
 
-        if not os.path.exists(thumb_path):
-            return self._part_thumbnails
-
-        for f in os.listdir(thumb_path):
-            parts = f.split('.')
-
-            if parts[-1].lower() not in ['jpg', 'png']:
+        for thumb_path in self._meta.thumbnail_paths:
+            if not os.path.exists(thumb_path):
                 continue
 
-            self._part_thumbnails['.'.join(parts[0:-1])] = os.path.join(
-                self.full_path, ZWP_PART_THUMBNAIL_DIR, f
-            )
+            if os.path.commonprefix([self.ds.path, thumb_path]) != self.ds.path:
+                print("Ignoring thumbnail path '{}': left data source directory".format(
+                    thumb_path
+                ))
+                continue
+
+            rel_path = os.path.relpath(thumb_path, self.ds.path)
+
+            for f in os.listdir(thumb_path):
+                parts = f.split('.')
+
+                if parts[-1].lower() not in ['jpg', 'png']:
+                    continue
+
+                self._part_thumbnails['.'.join(parts[0:-1])] = os.path.join(
+                    rel_path, f
+                )
 
         return self._part_thumbnails
 
@@ -295,14 +303,14 @@ class Directory(Item):
         self.accessible = acl.is_accessible(self.user)
 
     def _load_metadata(self):
-        meta = Metadata(self)
+        self._meta = Metadata(self)
 
-        if not meta.exists() or not meta.parse():
+        if not self._meta.exists() or not self._meta.parse():
             return
 
-        self._label = meta.label
-        self._columns = meta.columns
-        self._parts_meta = meta.parts_data
+        self._label = self._meta.label
+        self._columns = self._meta.columns
+        self._parts_meta = self._meta.parts_data
 
     def _find_icon(self, name):
         ret = False

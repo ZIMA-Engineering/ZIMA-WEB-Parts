@@ -13,6 +13,7 @@ class Metadata:
         self._dir = d
         self._path = os.path.join(d.data_path, ZWP_METADATA_DIR, ZWP_METADATA_FILE)
         self._lang = short_lang()
+        self._data_includes = []
 
     def exists(self):
         return os.path.exists(self._path)
@@ -21,7 +22,24 @@ class Metadata:
         self.cfg = configparser.ConfigParser(interpolation=None)
         self.cfg.read(self._path)
 
-        return self.cfg.has_section('params')
+        if self.cfg.has_section('include'):
+            from .models import Directory
+
+            def tmp(x):
+                meta = Metadata(Directory.from_path(
+                    self._dir.ds.name,
+                    self._resolve_path(x.strip()),
+                    user=self._dir.user
+                ))
+                meta.parse()
+                return meta
+
+            if self.cfg.has_option('include', 'data'):
+                self._data_includes = list(map(tmp, self.cfg['include']['data'].split(',')))
+
+            # TODO: if self.cfg.has_option('include', 'thumbs'):
+
+        return self.cfg.has_section('params') or self._data_includes
 
     @property
     def label(self):
@@ -34,14 +52,65 @@ class Metadata:
 
     @property
     def columns(self):
-        return list(map(lambda x: x[1], sorted(self._parse_columns().items())))
+        cols = {}
+
+        for meta in self._data_includes:
+            cols.update(meta._parse_columns())
+
+        cols.update(self._parse_columns())
+
+        return list(map(lambda x: x[1], sorted(cols.items())))
 
     @property
     def parts_data(self):
+        data = {}
+
+        for meta in self._data_includes:
+            data.update(meta._parse_parts_data())
+
+        data.update(self._parse_parts_data())
+
+        return data
+
+    def _resolve_path(self, path):
+        if path.startswith('/'):
+            return os.path.abspath(path)
+
+        return os.path.abspath(os.path.join(self._dir.data_path, path))
+
+    def _parse_columns(self):
+        if not self.cfg.has_section('params'):
+            return {}
+
+        columns = {}  # lang: [columns]
+
+        # Load options from all languages
+        for raw_opt in self.cfg.options('params'):
+            lang, opt = self._parse_opt(raw_opt)
+
+            if not lang in columns:
+                columns[lang] = {}
+
+            if not opt.isdigit():
+                continue
+
+            columns[lang][int(opt)] = self.cfg['params'][raw_opt].replace('"', '')
+
+        # Select language
+        for lang in columns:
+            if lang == self._lang:
+                return columns[lang]
+
+        if len(columns) == 0:
+            return {}
+
+        return columns[ list(columns.keys())[0] ]
+
+    def _parse_parts_data(self):
         ret = {}
 
         for sec in self.cfg.sections():
-            if sec == 'params':
+            if sec in ['include', 'params']:
                 continue
 
             part = {}
@@ -69,31 +138,6 @@ class Metadata:
                 ret[sec] = part[ list(part.keys())[0] ]
 
         return ret
-
-    def _parse_columns(self):
-        columns = {}  # lang: [columns]
-
-        # Load options from all languages
-        for raw_opt in self.cfg.options('params'):
-            lang, opt = self._parse_opt(raw_opt)
-
-            if not lang in columns:
-                columns[lang] = {}
-
-            if not opt.isdigit():
-                continue
-
-            columns[lang][int(opt)] = self.cfg['params'][raw_opt].replace('"', '')
-
-        # Select language
-        for lang in columns:
-            if lang == self._lang:
-                return columns[lang]
-
-        if len(columns) == 0:
-            return []
-
-        return columns[ list(columns.keys())[0] ]
 
     def _parse_opt(self, raw_opt):
         parts = []

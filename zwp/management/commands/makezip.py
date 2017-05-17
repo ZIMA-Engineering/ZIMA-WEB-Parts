@@ -22,6 +22,12 @@ class Command(BaseCommand):
             raise CommandError('DownloadBatch "%s" does not exist' % options['batch_id'])
 
         try:
+            zip_name, zip_dir, zip_path = self.zip_name(batch)
+
+            batch.state = batch.PREPARING
+            batch.zip_file = zip_name
+            batch.save()
+
             self.daemonize()
             self.make_zip(batch)
             batch.state = batch.DONE
@@ -38,10 +44,6 @@ class Command(BaseCommand):
                 .order_by('part_model__name')
 
         zip_name, zip_dir, zip_path = self.zip_name(batch)
-
-        batch.state = batch.PREPARING
-        batch.zip_file = zip_name
-        batch.save()
 
         os.makedirs(zip_dir, exist_ok=True)
 

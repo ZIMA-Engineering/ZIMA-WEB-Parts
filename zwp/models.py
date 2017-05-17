@@ -703,12 +703,16 @@ class DownloadBatch(models.Model):
     def make_zip(self):
         from .utils import find_interpreter
 
-        return subprocess.call([
+        ret = subprocess.call([
             find_interpreter(),
             os.path.join(settings.BASE_DIR, 'manage.py'),
             'makezip',
             str(self.pk)
         ]) == 0
+
+        self.refresh_from_db()
+
+        return ret
 
     def _generate_key(self, length):
         return ''.join(

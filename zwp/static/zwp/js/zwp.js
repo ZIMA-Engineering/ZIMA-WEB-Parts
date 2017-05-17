@@ -1,6 +1,34 @@
 (function() {
 	window.zwp = {};
 
+	function round (number, precision) {
+		var factor = Math.pow(10, precision);
+		var tempNumber = number * factor;
+		var roundedTempNumber = Math.round(tempNumber);
+		return roundedTempNumber / factor;
+	}
+
+	function filesize (n) {
+		if (n === null)
+			return '0 b';
+
+		var units = [
+			{threshold: 2 << 29, unit: 'GB'},
+			{threshold: 2 << 19, unit: 'MB'},
+			{threshold: 2 << 9,  unit: 'kB'},
+		];
+
+		var ret = "";
+		var selected = 0;
+
+		for (var i = 0; i < units.length; i++) {
+			if (n > units[i].threshold)
+				return round((n / units[i].threshold), 2) + "&nbsp;" + units[i].unit;
+		}
+
+		return round(n, 2);
+	}
+
 	zwp.setupContentTabs = function () {
 		nojsTabs({
 			tabs: document.getElementById('tabs'),
@@ -156,5 +184,45 @@
 				}
 			});
 		});
+	};
+
+	zwp.waitForDownload = function (url, preparing, done, error, progress) {
+		var timeout;
+
+		function update () {
+			$.ajax({
+				url: url,
+				dataType: 'json',
+				error: function () {
+					$(preparing).addClass('hidden');
+					$(error).removeClass('hidden');
+				},
+				success: function (response) {
+					switch (response.state) {
+						case 0: // open
+						case 1: // preparing
+							$(preparing).removeClass('hidden');
+							$(progress).html(filesize(response.real_size));
+							break;
+
+						case 2: // done
+							$(preparing).addClass('hidden');
+							$(done).removeClass('hidden');
+							return;
+
+						case 3: // closed
+						case 4: // error
+						default:
+							$(preparing).addClass('hidden');
+							$(error).removeClass('hidden');
+							return;
+					}
+
+					timeout = setTimeout(update, 1000);
+				}
+			});
+		}
+
+		timeout = setTimeout(update, 1000);
 	};
 })();

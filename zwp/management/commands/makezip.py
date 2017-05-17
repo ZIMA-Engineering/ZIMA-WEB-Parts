@@ -22,9 +22,6 @@ class Command(BaseCommand):
             raise CommandError('DownloadBatch "%s" does not exist' % options['batch_id'])
 
         try:
-            batch.state = batch.PREPARING
-            batch.save()
-
             self.daemonize()
             self.make_zip(batch)
             batch.state = batch.DONE
@@ -42,20 +39,26 @@ class Command(BaseCommand):
 
         zip_name, zip_dir, zip_path = self.zip_name(batch)
 
+        batch.state = batch.PREPARING
+        batch.zip_file = zip_name
+        batch.save()
+
+        os.makedirs(zip_dir, exist_ok=True)
+
+        zip = ZipFile(zip_path, 'w')
+
+        for dl in dls:
+            zip.write(
+                dl.part_model.part.data_path,
+                '{}/{}'.format(zip_name, dl.part_model.part.name)
+            )
+
+        zip.close()
+
         if settings.DEBUG:
             import time
             time.sleep(10)
 
-        os.makedirs(zip_dir, exist_ok=True)
-
-        with ZipFile(zip_path, 'w') as zip:
-            for dl in dls:
-                zip.write(
-                    dl.part_model.part.data_path,
-                    '{}/{}'.format(zip_name, dl.part_model.part.name)
-                )
-
-        batch.zip_file = zip_name
         batch.updated_at = timezone.now()
 
     def daemonize(self):

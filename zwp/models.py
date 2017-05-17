@@ -679,17 +679,26 @@ class DownloadBatch(models.Model):
             for dl in self.partdownload_set.select_related('part_model').all()
         ])
 
-    @property
+    @cached_property
     def count(self):
         return self.partdownload_set.all().count()
 
-    @property
+    @cached_property
     def zip_url(self):
         return os.path.join(ZWP_DOWNLOAD_URL, self.key, self.zip_file + '.zip')
 
-    @property
+    @cached_property
     def zip_size(self):
-        return os.stat(os.path.join(ZWP_DOWNLOAD_ROOT, self.key, self.zip_file + '.zip')).st_size
+        if not self.zip_file:
+            return None
+
+        try:
+            return os.path.getsize(os.path.join(
+                ZWP_DOWNLOAD_ROOT, self.key, self.zip_file + '.zip'
+            ))
+
+        except OSError:
+            return None
 
     def make_zip(self):
         from .utils import find_interpreter

@@ -6,32 +6,53 @@
 
 {% block head %}
 {% if batch.state == batch.PREPARING %}
-	<meta http-equiv="refresh" content="3">
+	<noscript>
+		<meta http-equiv="refresh" content="3">
+	</noscript>
 {% endif %}
 {% endblock %}
 
 {% block content %}
-{% if batch.state == batch.PREPARING %}
-	<p>
-	{% blocktrans trimmed %}
-	The ZIP file is being prepared. Please wait, this page will automatically
-	refresh.
-	{% endblocktrans %}
-	</p>
+<div id="zwp-download" class="text-center">
+	<div class="preparing {% if batch.state != batch.PREPARING %}hidden{% endif %}">
+		<p>
+			{% blocktrans trimmed %}
+			The ZIP file is being prepared. Please wait, this page will automatically
+			refresh.
+			{% endblocktrans %}
+		</p>
+		<p>
+			{% trans "Progress" %}:
+			<span class="zip-size">{{ batch.zip_size|filesizeformat }}</span>/~{{ batch.size|filesizeformat }}
+		</p>
+	</div>
 
-{% elif batch.state == batch.DONE %}
-	<p class="text-center">
+	<p class="done {% if batch.state != batch.DONE %}hidden{% endif %}">
 		{% trans "The ZIP file is ready for download:" %}<br><br>
 		<a href="{{ batch.zip_url }}">
 			<button class="btn btn-primary">
-				{% blocktrans trimmed with file=batch.zip_file size=batch.zip_size|filesizeformat %}
-				Download {{ file }}.zip ({{ size }})
+				{% blocktrans trimmed with file=batch.zip_file %}
+				Download {{ file }}.zip
 				{% endblocktrans %}
+				(<span class="zip-size">{{ batch.zip_size|filesizeformat }}</span>)
 			</button>
 		</a>
 	</p>
 
-{% else %}
-<p>{% trans "An error has occurred. Please try again." %}</p>
+	<p class="error {% if batch.state != batch.ERROR %}hidden{% endif %}">
+		{% trans "An error has occurred. Please try again." %}
+	</p>
+</div>
+
+{% if batch.state == batch.OPEN or batch.state == batch.PREPARING %}
+	<script>
+		zwp.waitForDownload(
+			'{% url 'zwp_download' batch.key %}',
+			'#zwp-download .preparing',
+			'#zwp-download .done',
+			'#zwp-download .error',
+			'#zwp-download .zip-size'
+		);
+	</script>
 {% endif %}
 {% endblock %}

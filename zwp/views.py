@@ -167,6 +167,14 @@ def download(request, key):
     if batch.user and batch.user != request.user:
         raise PermissionDenied()
 
+    if request.is_ajax():
+        return JsonResponse({
+            'state': batch.state,
+            'approx_size': batch.size,
+            'real_size': batch.zip_size,
+            'url': batch.zip_url,
+        })
+
     return render(request, 'zwp/download.html', {
         'batch': batch,
     })

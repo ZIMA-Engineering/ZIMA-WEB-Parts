@@ -84,21 +84,10 @@ class DirectoryContentView(View):
         })
 
     def _formset(self, request, batch, d):
-        part_downloads = batch and {
-            dl.part_model.hash: dl
-            for dl in batch.partdownload_set.select_related('part_model').all()
-        }
-
         return PartDownloadFormSet(
-            request.POST or None,
-            initial=[
-                {
-                    'batch': batch,
-                    'part': part,
-                    'dl': part_downloads and part_downloads.get(part.hash, None),
-                } for part in d.parts
-            ],
-            form_kwargs={'user': d.user},
+            request,
+            d,
+            batch
         )
 
 

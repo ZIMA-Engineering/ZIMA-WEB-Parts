@@ -122,7 +122,7 @@ class Directory(Item):
         v = cache.get(key)
 
         if v:
-            print('cache hit for ds={}; dir={}; user={}'.format(ds.name, full_path, user))
+            print('get: cache hit for ds={}; dir={}; user={}'.format(ds.name, full_path, user))
             return v
 
         d = Directory(ds, path, name=name, user=user, **kwargs)
@@ -142,7 +142,7 @@ class Directory(Item):
         v = cache.get(key)
 
         if v:
-            print('cache hit for ds={}; dir={}; user={}'.format(ds_name, path, user))
+            print('from_path: cache hit for ds={}; dir={}; user={}'.format(ds_name, path, user))
 
             if load:
                 v.load()

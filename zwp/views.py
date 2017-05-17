@@ -123,6 +123,9 @@ class DownloadsView(View):
         )
 
         if formset.is_valid():
+            for dl in self._queryset(batch):
+                clear_dir_content_cache(request, dl.part_model.part.dir)
+
             if 'download' in request.POST:
                 if batch.make_zip():
                     del request.session['zwp_download_batch']
@@ -139,9 +142,6 @@ class DownloadsView(View):
 
             elif 'update' in request.POST:
                 formset.save()
-
-                for dl in self._queryset(batch):
-                    clear_dir_content_cache(request, dl.part_model.part.dir)
 
             else:
                 return HttpResponseBadRequest()

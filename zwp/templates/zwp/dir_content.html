@@ -1,5 +1,5 @@
-{% load i18n zwp_tags %}
-
+{% load i18n zwp_tags cache %}
+{% cache 500 zwp_dir_content zwp_dir.ds.name zwp_dir.full_path request.user.username %}
 {% if show_label %}
 	<h2>{{ zwp_dir.label }}</h2>
 {% endif %}
@@ -112,3 +112,4 @@
 		</div>
 	{% endif %}
 </div>
+{% endcache %}

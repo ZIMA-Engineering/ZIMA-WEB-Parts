@@ -11,6 +11,7 @@ from .models import Directory, DownloadBatch, PartDownload
 from .forms import PartDownloadFormSet
 from .utils import format_children, get_or_create_download_batch, get_or_none
 from .settings import ZWP_DIR_SHOW_LABEL
+from .cache import clear_dir_content_cache
 
 
 class DirectoryContentView(View):
@@ -50,6 +51,7 @@ class DirectoryContentView(View):
     def post(self, request, d):
         batch = get_or_create_download_batch(request)
         formset = self._formset(request, batch, d)
+        clear_dir_content_cache(request, d)
 
         if formset.is_valid():
             formset.save()
@@ -137,6 +139,9 @@ class DownloadsView(View):
 
             elif 'update' in request.POST:
                 formset.save()
+
+                for dl in self._queryset(batch):
+                    clear_dir_content_cache(request, dl.part_model.part.dir)
 
             else:
                 return HttpResponseBadRequest()

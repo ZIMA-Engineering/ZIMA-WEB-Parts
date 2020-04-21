@@ -1,5 +1,5 @@
 from django.db import models, IntegrityError
-from django.core.urlresolvers import reverse
+from django.urls import reverse
 from django.contrib.staticfiles.storage import staticfiles_storage
 from django.utils.translation import ugettext_lazy as _
 from django.conf import settings
@@ -648,7 +648,7 @@ class DownloadBatch(models.Model):
         (ERROR, _('Error')),
     )
 
-    user = models.ForeignKey(User, null=True, blank=True)
+    user = models.ForeignKey(User, null=True, blank=True, on_delete=models.CASCADE)
     key = models.CharField(_('unique key'), max_length=40, unique=True)
     created_at = models.DateTimeField(_('created at'), auto_now_add=True)
     updated_at = models.DateTimeField(_('updated at'), null=True)
@@ -722,8 +722,8 @@ class DownloadBatch(models.Model):
 
 
 class PartDownload(models.Model):
-    download_batch = models.ForeignKey(DownloadBatch)
-    part_model = models.ForeignKey(PartModel)
+    download_batch = models.ForeignKey(DownloadBatch, on_delete=models.CASCADE)
+    part_model = models.ForeignKey(PartModel, on_delete=models.CASCADE)
     added_at = models.DateTimeField(_('added at'), auto_now_add=True)
 
     class Meta:

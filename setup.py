@@ -21,9 +21,10 @@ setup(
         ],
     },
     install_requires=[
-        'Django>=1.9',
+        'Django>=3.0',
         'django-formtools>=1.0',
         'django-form-utils>=1.0',
+        'easy-thumbnails>=2.7',
         'python-pam',
     ],
     classifiers=[

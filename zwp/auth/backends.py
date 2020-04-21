@@ -1,15 +1,16 @@
 from django.conf import settings
+from django.contrib.auth.backends import BaseBackend
 from django.contrib.auth.models import User
 from zwp.models import DataSource
 from zwp.metadata import Users
 from zwp.auth import data_sources
 
 
-class DataSourceBackend(object):
+class DataSourceBackend(BaseBackend):
     """
     Authenticate agains users defined in users.ini in the data directory.
     """
-    def authenticate(self, username=None, password=None):
+    def authenticate(self, request, username=None, password=None):
         for opts in data_sources():
             u = Users(DataSource(opts))
 

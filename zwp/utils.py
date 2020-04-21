@@ -78,7 +78,7 @@ def static_url(ds, path):
 def get_or_create_object(session, key, model, user=None):
     kwargs = {}
 
-    if user and user.is_authenticated():
+    if user and user.is_authenticated:
         kwargs['user'] = user
 
     if not session.session_key or key not in session:

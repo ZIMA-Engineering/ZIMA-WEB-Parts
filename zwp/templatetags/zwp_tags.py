@@ -59,8 +59,13 @@ def zwp_json_tree(context):
 
 
 @register.filter
-def part_column(part, n):
-    return part.get_column(n)
+def part_column(part, c):
+    v = part.get_column(c.handle)
+
+    if v is None:
+        return ''
+    else:
+        return v
 
 
 @register.inclusion_tag('zwp/part_thumbnail.html')

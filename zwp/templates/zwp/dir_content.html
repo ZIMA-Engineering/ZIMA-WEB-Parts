@@ -64,7 +64,7 @@
 						<th>{% trans "Thumbnail" %}</th>
 
 						{% for c in zwp_dir.columns %}
-							<th>{{ c }}</th>
+							<th>{{ c.label }}</th>
 						{% endfor %}
 					</tr>
 					{% for form in formset %}
@@ -103,7 +103,7 @@
 							<td>{% part_thumbnail form.part %}</td>
 
 							{% for c in zwp_dir.columns %}
-								<td>{{ form.part|part_column:forloop.counter }}</td>
+								<td>{{ form.part|part_column:c }}</td>
 							{% endfor %}
 						</tr>
 					{% endfor %}
